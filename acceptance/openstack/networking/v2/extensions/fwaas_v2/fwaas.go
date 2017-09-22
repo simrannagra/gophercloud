@@ -32,21 +32,24 @@ func CreateFirewallGroup(t *testing.T, client *gophercloud.ServiceClient, policy
 	if err != nil {
 		return firewall_group, err
 	}
+	//fmt.Printf("Created firewall_group=%+v.\n", firewall_group)
 
-	t.Logf("Waiting for firewall to become active.")
+	/*
+	// NOT ACTIVE if not connected to subnet, so don't wait?
+	t.Logf("Waiting for firewall group to become active.")
 	if err := WaitForFirewallGroupState(client, firewall_group.ID, "ACTIVE", 60); err != nil {
 		return firewall_group, err
-	}
+	} */
 
-	t.Logf("Successfully created firewall %s", firewallName)
+	t.Logf("Successfully created firewall group %s", firewallName)
 
 	return firewall_group, nil
 }
 
-// CreateFirewallOnRouter will create a Firewall with a random name and a
-// specified policy ID attached to a specified Router. An error will be
-// returned if the firewall could not be created.
-func CreateFirewallGroupOnRouter(t *testing.T, client *gophercloud.ServiceClient, policyID string, routerID string) (*firewall_groups.FirewallGroup, error) {
+// CreateFirewallGroupOnPort will create a Firewall group with a random name and a
+// specified policy ID attached to a specified Port. An error will be
+// returned if the firewall group could not be created.
+func CreateFirewallGroupOnPort(t *testing.T, client *gophercloud.ServiceClient, policyID string, portID string) (*firewall_groups.FirewallGroup, error) {
 	firewallName := tools.RandomString("TESTACC-", 8)
 
 	t.Logf("Attempting to create firewall group %s", firewallName)
@@ -59,7 +62,7 @@ func CreateFirewallGroupOnRouter(t *testing.T, client *gophercloud.ServiceClient
 
 	createOpts := routerinsertion.CreateOptsExt{
 		CreateOptsBuilder: firewallGroupCreateOpts,
-		RouterIDs:         []string{routerID},
+		PortIDs:         []string{portID},
 	}
 
 	firewall_group, err := firewall_groups.Create(client, createOpts).Extract()

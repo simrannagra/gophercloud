@@ -76,7 +76,7 @@ func CreateSubnet(t *testing.T, client *gophercloud.ServiceClient, networkID str
 		CIDR:       subnetCIDR,
 		IPVersion:  4,
 		Name:       subnetName,
-		EnableDHCP: gophercloud.Disabled,
+		EnableDHCP: gophercloud.Enabled,
 		GatewayIP:  &subnetGateway,
 	}
 

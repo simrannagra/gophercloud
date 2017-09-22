@@ -3,6 +3,7 @@ package firewall_groups
 import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/pagination"
+	//"fmt"
 )
 
 // ListOptsBuilder allows extensions to add additional parameters to the
@@ -21,7 +22,7 @@ type ListOpts struct {
 	Name         	string `q:"name"`
 	Description  	string `q:"description"`
 	AdminStateUp 	bool   `q:"admin_state_up"`
-	Shared       	bool   `q:"shared"`
+	Shared       	bool   `q:"public"`
 	IngressPolicyID	string `q:"ingress_firewall_policy_id"`
 	EgressPolicyID  string `q:"egress_firewall_policy_id"`
 	ID           	string `q:"id"`
@@ -75,22 +76,24 @@ type CreateOpts struct {
 	Name         	string `json:"name,omitempty"`
 	Description  	string `json:"description,omitempty"`
 	AdminStateUp 	*bool  `json:"admin_state_up,omitempty"`
-	Shared       	*bool  `json:"shared,omitempty"`
+	Shared       	*bool  `json:"public,omitempty"`
 }
 
-// ToFirewallCreateMap casts a CreateOpts struct to a map.
+// ToFirewallGroupCreateMap casts a CreateOpts struct to a map.
 func (opts CreateOpts) ToFirewallGroupCreateMap() (map[string]interface{}, error) {
 	return gophercloud.BuildRequestBody(opts, "firewall_group")
 }
 
-// Create accepts a CreateOpts struct and uses the values to create a new firewall
+// Create accepts a CreateOpts struct and uses the values to create a new firewall group
 func Create(c *gophercloud.ServiceClient, opts CreateOptsBuilder) (r CreateResult) {
 	b, err := opts.ToFirewallGroupCreateMap()
 	if err != nil {
 		r.Err = err
 		return
 	}
+	//fmt.Printf("Creating %+v.\n", r)
 	_, r.Err = c.Post(rootURL(c), b, &r.Body, nil)
+	//fmt.Printf("Created %+v.\n", r)
 	return
 }
 
@@ -115,7 +118,7 @@ type UpdateOpts struct {
 	Name         	string `json:"name,omitempty"`
 	Description  	string `json:"description,omitempty"`
 	AdminStateUp 	*bool  `json:"admin_state_up,omitempty"`
-	Shared       	*bool  `json:"shared,omitempty"`
+	Shared       	*bool  `json:"public,omitempty"`
 }
 
 // ToFirewallGroupUpdateMap casts a CreateOpts struct to a map.

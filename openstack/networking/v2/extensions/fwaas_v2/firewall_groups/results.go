@@ -3,6 +3,7 @@ package firewall_groups
 import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/pagination"
+	//"fmt"
 )
 
 // FirewallGroup is an OpenStack firewall_group.
@@ -24,12 +25,14 @@ type commonResult struct {
 // Extract is a function that accepts a result and extracts a firewall.
 func (r commonResult) Extract() (*FirewallGroup, error) {
 	var s FirewallGroup
+	//fmt.Printf("Extracting %s.\n", r.PrettyPrintJSON())
 	err := r.ExtractInto(&s)
+	//fmt.Printf("Extracted %+v.\n", s)
 	return &s, err
 }
 
 func (r commonResult) ExtractInto(v interface{}) error {
-	return r.Result.ExtractIntoStructPtr(v, "firewall")
+	return r.Result.ExtractIntoStructPtr(v, "firewall_group")
 }
 
 func ExtractFirewallGroupsInto(r pagination.Page, v interface{}) error {

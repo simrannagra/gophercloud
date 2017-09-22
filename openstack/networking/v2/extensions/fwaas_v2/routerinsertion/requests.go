@@ -7,7 +7,7 @@ import (
 // CreateOptsExt adds a RouterIDs option to the base CreateOpts.
 type CreateOptsExt struct {
 	firewall_groups.CreateOptsBuilder
-	RouterIDs []string `json:"router_ids"`
+	PortIDs []string `json:"ports"`
 }
 
 // ToFirewallGroupCreateMap adds router_ids to the base firewall creation options.
@@ -18,7 +18,7 @@ func (opts CreateOptsExt) ToFirewallGroupCreateMap() (map[string]interface{}, er
 	}
 
 	firewallMap := base["firewall_group"].(map[string]interface{})
-	firewallMap["router_ids"] = opts.RouterIDs
+	firewallMap["ports"] = opts.PortIDs
 
 	return base, nil
 }
@@ -26,7 +26,7 @@ func (opts CreateOptsExt) ToFirewallGroupCreateMap() (map[string]interface{}, er
 // UpdateOptsExt updates a RouterIDs option to the base UpdateOpts.
 type UpdateOptsExt struct {
 	firewall_groups.UpdateOptsBuilder
-	RouterIDs []string `json:"router_ids"`
+	PortIDs []string `json:"ports"`
 }
 
 // ToFirewallUpdateMap adds router_ids to the base firewall update options.
@@ -37,7 +37,7 @@ func (opts UpdateOptsExt) ToFirewallUpdateMap() (map[string]interface{}, error) 
 	}
 
 	firewallMap := base["firewall_group"].(map[string]interface{})
-	firewallMap["router_ids"] = opts.RouterIDs
+	firewallMap["ports"] = opts.PortIDs
 
 	return base, nil
 }

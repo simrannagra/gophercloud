@@ -23,7 +23,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/schedulerhints"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/servergroups"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tenantnetworks"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 
@@ -681,12 +680,13 @@ func GetNetworkIDFromTenantNetworks(t *testing.T, client *gophercloud.ServiceCli
 		return "", err
 	}
 
-	allTenantNetworks, err := tenantnetworks.ExtractNetworks(allPages)
+	//allTenantNetworks, err := tenantnetworks.ExtractNetworks(allPages)
+	allNetworks, err := net.ExtractNetworks(allPages)
 	if err != nil {
 		return "", err
 	}
 
-	for _, network := range allTenantNetworks {
+	for _, network := range allNetworks {
 		fmt.Printf("network=%+v", network)
 		if network.Name == networkName {
 			return network.ID, nil
