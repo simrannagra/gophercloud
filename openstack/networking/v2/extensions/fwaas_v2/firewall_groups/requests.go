@@ -1,4 +1,4 @@
-package firewalls
+package firewall_groups
 
 import (
 	"github.com/gophercloud/gophercloud"
@@ -8,7 +8,7 @@ import (
 // ListOptsBuilder allows extensions to add additional parameters to the
 // List request.
 type ListOptsBuilder interface {
-	ToFirewallListQuery() (string, error)
+	ToFirewallGroupListQuery() (string, error)
 }
 
 // ListOpts allows the filtering and sorting of paginated collections through
@@ -17,42 +17,43 @@ type ListOptsBuilder interface {
 // by a particular firewall attribute. SortDir sets the direction, and is either
 // `asc' or `desc'. Marker and Limit are used for pagination.
 type ListOpts struct {
-	TenantID     string `q:"tenant_id"`
-	Name         string `q:"name"`
-	Description  string `q:"description"`
-	AdminStateUp bool   `q:"admin_state_up"`
-	Shared       bool   `q:"shared"`
-	PolicyID     string `q:"firewall_policy_id"`
-	ID           string `q:"id"`
-	Limit        int    `q:"limit"`
-	Marker       string `q:"marker"`
-	SortKey      string `q:"sort_key"`
-	SortDir      string `q:"sort_dir"`
+	TenantID     	string `q:"tenant_id"`
+	Name         	string `q:"name"`
+	Description  	string `q:"description"`
+	AdminStateUp 	bool   `q:"admin_state_up"`
+	Shared       	bool   `q:"shared"`
+	IngressPolicyID	string `q:"ingress_firewall_policy_id"`
+	EgressPolicyID  string `q:"egress_firewall_policy_id"`
+	ID           	string `q:"id"`
+	Limit        	int    `q:"limit"`
+	Marker       	string `q:"marker"`
+	SortKey      	string `q:"sort_key"`
+	SortDir      	string `q:"sort_dir"`
 }
 
 // ToFirewallListQuery formats a ListOpts into a query string.
-func (opts ListOpts) ToFirewallListQuery() (string, error) {
+func (opts ListOpts) ToFirewallGroupListQuery() (string, error) {
 	q, err := gophercloud.BuildQueryString(opts)
 	return q.String(), err
 }
 
 // List returns a Pager which allows you to iterate over a collection of
-// firewalls. It accepts a ListOpts struct, which allows you to filter
+// firewall_groups. It accepts a ListOpts struct, which allows you to filter
 // and sort the returned collection for greater efficiency.
 //
-// Default policy settings return only those firewalls that are owned by the
+// Default policy settings return only those firewall_groups that are owned by the
 // tenant who submits the request, unless an admin user submits the request.
 func List(c *gophercloud.ServiceClient, opts ListOptsBuilder) pagination.Pager {
 	url := rootURL(c)
 	if opts != nil {
-		query, err := opts.ToFirewallListQuery()
+		query, err := opts.ToFirewallGroupListQuery()
 		if err != nil {
 			return pagination.Pager{Err: err}
 		}
 		url += query
 	}
 	return pagination.NewPager(c, url, func(r pagination.PageResult) pagination.Page {
-		return FirewallPage{pagination.LinkedPageBase{PageResult: r}}
+		return FirewallGroupPage{pagination.LinkedPageBase{PageResult: r}}
 	})
 }
 
@@ -61,29 +62,30 @@ func List(c *gophercloud.ServiceClient, opts ListOptsBuilder) pagination.Pager {
 // extensions decorate or modify the common logic, it is useful for them to
 // satisfy a basic interface in order for them to be used.
 type CreateOptsBuilder interface {
-	ToFirewallCreateMap() (map[string]interface{}, error)
+	ToFirewallGroupCreateMap() (map[string]interface{}, error)
 }
 
-// CreateOpts contains all the values needed to create a new firewall.
+// CreateOpts contains all the values needed to create a new firewall_group.
 type CreateOpts struct {
-	PolicyID string `json:"firewall_policy_id" required:"true"`
+	IngressPolicyID	string `json:"ingress_firewall_policy_id,omitempty"`
+	EgressPolicyID	string `json:"egress_firewall_policy_id,omitempty"`
 	// Only required if the caller has an admin role and wants to create a firewall
 	// for another tenant.
-	TenantID     string `json:"tenant_id,omitempty"`
-	Name         string `json:"name,omitempty"`
-	Description  string `json:"description,omitempty"`
-	AdminStateUp *bool  `json:"admin_state_up,omitempty"`
-	Shared       *bool  `json:"shared,omitempty"`
+	TenantID     	string `json:"tenant_id,omitempty"`
+	Name         	string `json:"name,omitempty"`
+	Description  	string `json:"description,omitempty"`
+	AdminStateUp 	*bool  `json:"admin_state_up,omitempty"`
+	Shared       	*bool  `json:"shared,omitempty"`
 }
 
 // ToFirewallCreateMap casts a CreateOpts struct to a map.
-func (opts CreateOpts) ToFirewallCreateMap() (map[string]interface{}, error) {
-	return gophercloud.BuildRequestBody(opts, "firewall")
+func (opts CreateOpts) ToFirewallGroupCreateMap() (map[string]interface{}, error) {
+	return gophercloud.BuildRequestBody(opts, "firewall_group")
 }
 
 // Create accepts a CreateOpts struct and uses the values to create a new firewall
 func Create(c *gophercloud.ServiceClient, opts CreateOptsBuilder) (r CreateResult) {
-	b, err := opts.ToFirewallCreateMap()
+	b, err := opts.ToFirewallGroupCreateMap()
 	if err != nil {
 		r.Err = err
 		return
@@ -103,26 +105,27 @@ func Get(c *gophercloud.ServiceClient, id string) (r GetResult) {
 // extensions decorate or modify the common logic, it is useful for them to
 // satisfy a basic interface in order for them to be used.
 type UpdateOptsBuilder interface {
-	ToFirewallUpdateMap() (map[string]interface{}, error)
+	ToFirewallGroupUpdateMap() (map[string]interface{}, error)
 }
 
 // UpdateOpts contains the values used when updating a firewall.
 type UpdateOpts struct {
-	PolicyID     string `json:"firewall_policy_id" required:"true"`
-	Name         string `json:"name,omitempty"`
-	Description  string `json:"description,omitempty"`
-	AdminStateUp *bool  `json:"admin_state_up,omitempty"`
-	Shared       *bool  `json:"shared,omitempty"`
+	IngressPolicyID	string `json:"ingress_firewall_policy_id,omitempty"`
+	EgressPolicyID  string `json:"egress_firewall_policy_id,omitempty"`
+	Name         	string `json:"name,omitempty"`
+	Description  	string `json:"description,omitempty"`
+	AdminStateUp 	*bool  `json:"admin_state_up,omitempty"`
+	Shared       	*bool  `json:"shared,omitempty"`
 }
 
-// ToFirewallUpdateMap casts a CreateOpts struct to a map.
-func (opts UpdateOpts) ToFirewallUpdateMap() (map[string]interface{}, error) {
-	return gophercloud.BuildRequestBody(opts, "firewall")
+// ToFirewallGroupUpdateMap casts a CreateOpts struct to a map.
+func (opts UpdateOpts) ToFirewallGroupUpdateMap() (map[string]interface{}, error) {
+	return gophercloud.BuildRequestBody(opts, "firewall_group")
 }
 
-// Update allows firewalls to be updated.
+// Update allows firewall_groups to be updated.
 func Update(c *gophercloud.ServiceClient, id string, opts UpdateOptsBuilder) (r UpdateResult) {
-	b, err := opts.ToFirewallUpdateMap()
+	b, err := opts.ToFirewallGroupUpdateMap()
 	if err != nil {
 		r.Err = err
 		return

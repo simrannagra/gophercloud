@@ -17,6 +17,8 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/networks"
+	//"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tenantnetworks"
+	net "github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/quotasets"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/schedulerhints"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
@@ -299,6 +301,7 @@ func CreateServer(t *testing.T, client *gophercloud.ServiceClient) (*servers.Ser
 		t.Fatal(err)
 	}
 
+	//fmt.Printf("CreateServer: NetworkName=%s\n", choices.NetworkName)
 	networkID, err := GetNetworkIDFromTenantNetworks(t, client, choices.NetworkName)
 	if err != nil {
 		return server, err
@@ -309,6 +312,7 @@ func CreateServer(t *testing.T, client *gophercloud.ServiceClient) (*servers.Ser
 
 	pwd := tools.MakeNewPassword("")
 
+	//fmt.Printf("CreateServer Create.\n")
 	server, err = servers.Create(client, servers.CreateOpts{
 		Name:      name,
 		FlavorRef: choices.FlavorID,
@@ -665,7 +669,14 @@ func GetNetworkIDFromNetworks(t *testing.T, client *gophercloud.ServiceClient, n
 // network name using the os-tenant-networks API extension. An error will be
 // returned if the network could not be retrieved.
 func GetNetworkIDFromTenantNetworks(t *testing.T, client *gophercloud.ServiceClient, networkName string) (string, error) {
-	allPages, err := tenantnetworks.List(client).AllPages()
+	//fmt.Printf("GetNetworkIDFromTenantNetworks...")
+	// Use non-deprecated API
+	netClient, err := clients.NewNetworkV2Client()
+	if err != nil {
+		t.Fatalf("Unable to create a network client: %v", err)
+	}
+	allPages, err := net.List(netClient, nil).AllPages()
+	// allPages, err := tenantnetworks.List(client).AllPages()
 	if err != nil {
 		return "", err
 	}
@@ -676,6 +687,7 @@ func GetNetworkIDFromTenantNetworks(t *testing.T, client *gophercloud.ServiceCli
 	}
 
 	for _, network := range allTenantNetworks {
+		fmt.Printf("network=%+v", network)
 		if network.Name == networkName {
 			return network.ID, nil
 		}

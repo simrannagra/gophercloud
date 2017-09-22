@@ -1,4 +1,4 @@
-package firewalls
+package firewall_groups
 
 import "fmt"
 

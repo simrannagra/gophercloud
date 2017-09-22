@@ -1,10 +1,10 @@
-package firewalls
+package firewall_groups
 
 import "github.com/gophercloud/gophercloud"
 
 const (
 	rootPath     = "fwaas"
-	resourcePath = "firewalls"
+	resourcePath = "firewall_groups"
 )
 
 func rootURL(c *gophercloud.ServiceClient) string {
