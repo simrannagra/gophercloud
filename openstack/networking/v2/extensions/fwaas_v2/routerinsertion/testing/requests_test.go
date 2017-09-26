@@ -7,8 +7,8 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	fake "github.com/gophercloud/gophercloud/openstack/networking/v2/common"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/firewalls"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/routerinsertion"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/firewall_groups"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/routerinsertion"
 	th "github.com/gophercloud/gophercloud/testhelper"
 )
 
@@ -23,7 +23,7 @@ func TestCreate(t *testing.T) {
 		th.TestHeader(t, r, "Accept", "application/json")
 		th.TestJSONRequest(t, r, `
 {
-    "firewall":{
+    "firewall_group":{
         "name": "fw",
         "description": "OpenStack firewall",
         "admin_state_up": true,
@@ -41,7 +41,7 @@ func TestCreate(t *testing.T) {
 
 		fmt.Fprintf(w, `
 {
-    "firewall":{
+    "firewall_group":{
         "status": "PENDING_CREATE",
         "name": "fw",
         "description": "OpenStack firewall",
@@ -53,19 +53,20 @@ func TestCreate(t *testing.T) {
     `)
 	})
 
-	firewallCreateOpts := firewalls.CreateOpts{
-		TenantID:     "b4eedccc6fb74fa8a7ad6b08382b852b",
-		Name:         "fw",
-		Description:  "OpenStack firewall",
-		AdminStateUp: gophercloud.Enabled,
-		PolicyID:     "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+	firewallCreateOpts := firewall_groups.CreateOpts{
+		TenantID:     		"b4eedccc6fb74fa8a7ad6b08382b852b",
+		Name:         		"fw",
+		Description:  		"OpenStack firewall",
+		AdminStateUp: 		gophercloud.Enabled,
+		IngressPolicyID:	"19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+		EgressPolicyID:		"19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
 	}
 	createOpts := routerinsertion.CreateOptsExt{
-		CreateOptsBuilder: firewallCreateOpts,
-		RouterIDs:         []string{"8a3a0d6a-34b5-4a92-b65d-6375a4c1e9e8"},
+		CreateOptsBuilder:	firewallCreateOpts,
+		PortIDs:			[]string{"8a3a0d6a-34b5-4a92-b65d-6375a4c1e9e8"},
 	}
 
-	_, err := firewalls.Create(fake.ServiceClient(), createOpts).Extract()
+	_, err := firewall_groups.Create(fake.ServiceClient(), createOpts).Extract()
 	th.AssertNoErr(t, err)
 }
 
@@ -80,7 +81,7 @@ func TestCreateWithNoRouters(t *testing.T) {
 		th.TestHeader(t, r, "Accept", "application/json")
 		th.TestJSONRequest(t, r, `
 {
-    "firewall":{
+    "firewall_group":{
         "name": "fw",
         "description": "OpenStack firewall",
         "admin_state_up": true,
@@ -96,31 +97,33 @@ func TestCreateWithNoRouters(t *testing.T) {
 
 		fmt.Fprintf(w, `
 {
-    "firewall":{
+    "firewall_group":{
         "status": "PENDING_CREATE",
         "name": "fw",
         "description": "OpenStack firewall",
         "admin_state_up": true,
         "tenant_id": "b4eedccc6fb74fa8a7ad6b08382b852b",
-        "firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c"
+        "ingress_firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c"
+        "egress_firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c"
     }
 }
     `)
 	})
 
-	firewallCreateOpts := firewalls.CreateOpts{
-		TenantID:     "b4eedccc6fb74fa8a7ad6b08382b852b",
-		Name:         "fw",
-		Description:  "OpenStack firewall",
-		AdminStateUp: gophercloud.Enabled,
-		PolicyID:     "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+	firewallCreateOpts := firewall_groups.CreateOpts{
+		TenantID:     		"b4eedccc6fb74fa8a7ad6b08382b852b",
+		Name:         		"fw",
+		Description:  		"OpenStack firewall group",
+		AdminStateUp: 		gophercloud.Enabled,
+		IngressPolicyID:	"19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+		EgressPolicyID:		"19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
 	}
 	createOpts := routerinsertion.CreateOptsExt{
 		CreateOptsBuilder: firewallCreateOpts,
-		RouterIDs:         []string{},
+		PortIDs:         []string{},
 	}
 
-	_, err := firewalls.Create(fake.ServiceClient(), createOpts).Extract()
+	_, err := firewall_groups.Create(fake.ServiceClient(), createOpts).Extract()
 	th.AssertNoErr(t, err)
 }
 
@@ -135,12 +138,13 @@ func TestUpdate(t *testing.T) {
 		th.TestHeader(t, r, "Accept", "application/json")
 		th.TestJSONRequest(t, r, `
 {
-    "firewall":{
+    "firewall_group":{
         "name": "fw",
         "description": "updated fw",
         "admin_state_up":false,
-        "firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
-        "router_ids": [
+        "ingress_firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+        "egress_firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+        "ports": [
           "8a3a0d6a-34b5-4a92-b65d-6375a4c1e9e8"
         ]
     }
@@ -152,31 +156,33 @@ func TestUpdate(t *testing.T) {
 
 		fmt.Fprintf(w, `
 {
-    "firewall": {
+    "firewall_group": {
         "status": "ACTIVE",
         "name": "fw",
         "admin_state_up": false,
         "tenant_id": "b4eedccc6fb74fa8a7ad6b08382b852b",
-        "firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+        "ingress_firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+        "egress_firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
         "id": "ea5b5315-64f6-4ea3-8e58-981cc37c6576",
-        "description": "OpenStack firewall"
+        "description": "OpenStack firewall group"
     }
 }
     `)
 	})
 
-	firewallUpdateOpts := firewalls.UpdateOpts{
-		Name:         "fw",
-		Description:  "updated fw",
-		AdminStateUp: gophercloud.Disabled,
-		PolicyID:     "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+	firewallUpdateOpts := firewall_groups.UpdateOpts{
+		Name:         		"fw",
+		Description:  		"updated fw",
+		AdminStateUp: 		gophercloud.Disabled,
+		IngressPolicyID:	"19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+		EgressPolicyID:     "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
 	}
 	updateOpts := routerinsertion.UpdateOptsExt{
 		UpdateOptsBuilder: firewallUpdateOpts,
-		RouterIDs:         []string{"8a3a0d6a-34b5-4a92-b65d-6375a4c1e9e8"},
+		PortIDs:         	[]string{"8a3a0d6a-34b5-4a92-b65d-6375a4c1e9e8"},
 	}
 
-	_, err := firewalls.Update(fake.ServiceClient(), "ea5b5315-64f6-4ea3-8e58-981cc37c6576", updateOpts).Extract()
+	_, err := firewall_groups.Update(fake.ServiceClient(), "ea5b5315-64f6-4ea3-8e58-981cc37c6576", updateOpts).Extract()
 	th.AssertNoErr(t, err)
 }
 
@@ -191,12 +197,13 @@ func TestUpdateWithNoRouters(t *testing.T) {
 		th.TestHeader(t, r, "Accept", "application/json")
 		th.TestJSONRequest(t, r, `
 {
-    "firewall":{
+    "firewall_group":{
         "name": "fw",
         "description": "updated fw",
         "admin_state_up":false,
-        "firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
-        "router_ids": []
+        "ingress_firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+        "egress_firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+        "ports": []
     }
 }
       `)
@@ -206,30 +213,32 @@ func TestUpdateWithNoRouters(t *testing.T) {
 
 		fmt.Fprintf(w, `
 {
-    "firewall": {
+    "firewall_group": {
         "status": "ACTIVE",
         "name": "fw",
         "admin_state_up": false,
         "tenant_id": "b4eedccc6fb74fa8a7ad6b08382b852b",
-        "firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+        "ingress_firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+        "egress_firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
         "id": "ea5b5315-64f6-4ea3-8e58-981cc37c6576",
-        "description": "OpenStack firewall"
+        "description": "OpenStack firewall group"
     }
 }
     `)
 	})
 
-	firewallUpdateOpts := firewalls.UpdateOpts{
-		Name:         "fw",
-		Description:  "updated fw",
-		AdminStateUp: gophercloud.Disabled,
-		PolicyID:     "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+	firewallUpdateOpts := firewall_groups.UpdateOpts{
+		Name:         		"fw",
+		Description:  		"updated fw",
+		AdminStateUp: 		gophercloud.Disabled,
+		IngressPolicyID:    "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+		EgressPolicyID:		"19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
 	}
 	updateOpts := routerinsertion.UpdateOptsExt{
 		UpdateOptsBuilder: firewallUpdateOpts,
-		RouterIDs:         []string{},
+		PortIDs:         	[]string{},
 	}
 
-	_, err := firewalls.Update(fake.ServiceClient(), "ea5b5315-64f6-4ea3-8e58-981cc37c6576", updateOpts).Extract()
+	_, err := firewall_groups.Update(fake.ServiceClient(), "ea5b5315-64f6-4ea3-8e58-981cc37c6576", updateOpts).Extract()
 	th.AssertNoErr(t, err)
 }

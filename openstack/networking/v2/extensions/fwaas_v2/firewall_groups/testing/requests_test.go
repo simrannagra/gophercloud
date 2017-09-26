@@ -137,7 +137,7 @@ func TestListWithExtensions(t *testing.T) {
 
 	type FirewallsWithExt struct {
 		firewall_groups.FirewallGroup
-		routerinsertion.FirewallExt
+		routerinsertion.FirewallGroupExt
 	}
 
 	allPages, err := firewall_groups.List(fake.ServiceClient(), nil).AllPages()
@@ -148,7 +148,7 @@ func TestListWithExtensions(t *testing.T) {
 	th.AssertNoErr(t, err)
 	th.AssertEquals(t, 2, len(actual))
 	th.AssertEquals(t, "fb5b5315-64f6-4ea3-8e58-981cc37c6f61", actual[0].ID)
-	th.AssertEquals(t, "abcd1234", actual[0].RouterIDs[0])
+	th.AssertEquals(t, "abcd1234", actual[0].PortIDs[0])
 }
 
 func TestCreate(t *testing.T) {
@@ -273,7 +273,7 @@ func TestGetWithExtensions(t *testing.T) {
 
 	var fw struct {
 		firewall_groups.FirewallGroup
-		routerinsertion.FirewallExt
+		routerinsertion.FirewallGroupExt
 	}
 
 	err := firewall_groups.Get(fake.ServiceClient(), "fb5b5315-64f6-4ea3-8e58-981cc37c6f61").ExtractInto(&fw)
@@ -287,7 +287,7 @@ func TestGetWithExtensions(t *testing.T) {
 	th.AssertEquals(t, "34be8c83-4d42-4dca-a74e-b77fffb8e28a", fw.EgressPolicyID)
 	th.AssertEquals(t, "fb5b5315-64f6-4ea3-8e58-981cc37c6f61", fw.ID)
 	th.AssertEquals(t, "b4eedccc6fb74fa8a7ad6b08382b852b", fw.TenantID)
-	th.AssertEquals(t, "abcd1234", fw.RouterIDs[0])
+	th.AssertEquals(t, "abcd1234", fw.PortIDs[0])
 }
 
 func TestUpdate(t *testing.T) {
