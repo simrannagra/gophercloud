@@ -9,6 +9,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	"fmt"
 )
 
 // CreateFloatingIP creates a floating IP on a given network and port. An error
@@ -153,7 +154,7 @@ func DeleteRouterInterface(t *testing.T, client *gophercloud.ServiceClient, port
 
 	_, err := routers.RemoveInterface(client, routerID, riOpts).Extract()
 	if err != nil {
-		t.Fatalf("Failed to detach port %s from router %s", portID, routerID)
+		t.Fatalf("Failed to detach port %s from router %s with error %s", portID, routerID, err.Error())
 	}
 
 	if err := WaitForRouterInterfaceToDetach(client, portID, 60); err != nil {
@@ -210,7 +211,9 @@ func WaitForRouterToDelete(client *gophercloud.ServiceClient, routerID string, s
 func WaitForRouterInterfaceToAttach(client *gophercloud.ServiceClient, routerInterfaceID string, secs int) error {
 	return gophercloud.WaitFor(secs, func() (bool, error) {
 		r, err := ports.Get(client, routerInterfaceID).Extract()
+		fmt.Printf("WaitForRouterInterfaceToAttach got port=%+v\n.", r)
 		if err != nil {
+			fmt.Printf("WaitForRouterInterfaceToAttach returning error.\n")
 			return false, err
 		}
 

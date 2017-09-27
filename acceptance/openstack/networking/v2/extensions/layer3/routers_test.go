@@ -34,6 +34,29 @@ func TestLayer3RouterList(t *testing.T) {
 	}
 }
 
+func TestLayer3RoutersDelete(t *testing.T) {
+	client, err := clients.NewNetworkV2Client()
+	if err != nil {
+		t.Fatalf("Unable to create a network client: %v", err)
+	}
+
+	listOpts := routers.ListOpts{}
+	allPages, err := routers.List(client, listOpts).AllPages()
+	if err != nil {
+		t.Fatalf("Unable to list routers: %v", err)
+	}
+
+	allRouters, err := routers.ExtractRouters(allPages)
+	if err != nil {
+		t.Fatalf("Unable to extract routers: %v", err)
+	}
+
+	for _, router := range allRouters {
+		tools.PrintResource(t, router)
+		DeleteRouter(t, client, router.ID)
+	}
+}
+
 func TestLayer3RouterCreateDelete(t *testing.T) {
 	client, err := clients.NewNetworkV2Client()
 	if err != nil {

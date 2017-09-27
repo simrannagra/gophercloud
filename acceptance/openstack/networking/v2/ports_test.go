@@ -4,11 +4,13 @@ package v2
 
 import (
 	"testing"
+	"fmt"
 
 	"github.com/gophercloud/gophercloud/acceptance/clients"
 	extensions "github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2/extensions"
 	"github.com/gophercloud/gophercloud/acceptance/tools"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	"github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2/extensions/layer3"
 )
 
 func TestPortsList(t *testing.T) {
@@ -29,6 +31,33 @@ func TestPortsList(t *testing.T) {
 
 	for _, port := range allPorts {
 		tools.PrintResource(t, port)
+	}
+}
+
+func TestPortsDeleteAll(t *testing.T) {
+	client, err := clients.NewNetworkV2Client()
+	if err != nil {
+		t.Fatalf("Unable to create a network client: %v", err)
+	}
+
+	allPages, err := ports.List(client, nil).AllPages()
+	if err != nil {
+		t.Fatalf("Unable to list ports: %v", err)
+	}
+
+	allPorts, err := ports.ExtractPorts(allPages)
+	if err != nil {
+		t.Fatalf("Unable to extract ports: %v", err)
+	}
+
+	for _, port := range allPorts {
+		tools.PrintResource(t, port)
+		if port.DeviceID != "" && port.DeviceOwner == "network:router_interface_distributed" {
+			fmt.Printf("DeleteRouterInterface...\n")
+			layer3.DeleteRouterInterface(t, client, port.ID, port.DeviceID)
+			//fmt.Printf("DeletePort...\n")
+			//DeletePort(t, client, port.ID)
+		}
 	}
 }
 

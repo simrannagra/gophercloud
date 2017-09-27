@@ -31,6 +31,28 @@ func TestRuleList(t *testing.T) {
 	}
 }
 
+func TestRulesDelete(t *testing.T) {
+	client, err := clients.NewNetworkV2Client()
+	if err != nil {
+		t.Fatalf("Unable to create a network client: %v", err)
+	}
+
+	allPages, err := rules.List(client, nil).AllPages()
+	if err != nil {
+		t.Fatalf("Unable to list rules: %v", err)
+	}
+
+	allRules, err := rules.ExtractRules(allPages)
+	if err != nil {
+		t.Fatalf("Unable to extract rules: %v", err)
+	}
+
+	for _, rule := range allRules {
+		tools.PrintResource(t, rule)
+		DeleteRule(t, client, rule.ID)
+	}
+}
+
 func TestRuleCRUD(t *testing.T) {
 	client, err := clients.NewNetworkV2Client()
 	if err != nil {

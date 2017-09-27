@@ -7,12 +7,13 @@ import (
 	//"fmt"
 
 	"github.com/gophercloud/gophercloud/acceptance/clients"
-	//layer3 "github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2/extensions/layer3"
-	//networking "github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2"
+	"github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2/extensions/layer3"
+	//"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
+	networking "github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2"
 	//compute "github.com/gophercloud/gophercloud/acceptance/openstack/compute/v2"
 	"github.com/gophercloud/gophercloud/acceptance/tools"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/firewall_groups"
-	//"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/routerinsertion"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/routerinsertion"
 )
 
 func TestFirewallGroupList(t *testing.T) {
@@ -87,7 +88,6 @@ func TestFirewallGroupCRUD(t *testing.T) {
 	tools.PrintResource(t, newFirewallGroup)
 }
 
-/*
 // Problems on OTC
 func TestFirewallGroupCRUDPort(t *testing.T) {
 	client, err := clients.NewNetworkV2Client()
@@ -95,44 +95,46 @@ func TestFirewallGroupCRUDPort(t *testing.T) {
 		t.Fatalf("Unable to create a network client: %v", err)
 	}
 
-	choices, err := clients.AcceptanceTestChoicesFromEnv()
+	/*choices, err := clients.AcceptanceTestChoicesFromEnv()
 	if err != nil {
 		t.Fatal(err)
-	}
+	}*/
 
-	networkID, err := compute.GetNetworkIDFromTenantNetworks(t, client, choices.NetworkName)
+	/*netid, err := networks.IDFromName(client, choices.NetworkName)
 	if err != nil {
-		t.Fatal(err)
-	}
+		t.Fatalf("Unable to find network id: %v", err)
+	}*/
 
-	//network, err := networks.Get(client, networkID).Extract()
-	//if err != nil {
-	//	t.Fatalf("Unable to get network %s: %v", networkID, err)
-	//}
-
-	// Create Network
+	// Create a network
 	network, err := networking.CreateNetwork(t, client)
 	if err != nil {
 		t.Fatalf("Unable to create network: %v", err)
 	}
-	fmt.Printf("network=%+v.\n", network)
 	defer networking.DeleteNetwork(t, client, network.ID)
 
-	// Create Subnet
-	subnet, err := networking.CreateSubnet(t, client, networkID) //network.ID)
+	tools.PrintResource(t, network)
+	subnet, err := networking.CreateSubnet(t, client, network.ID)
 	if err != nil {
 		t.Fatalf("Unable to create subnet: %v", err)
 	}
-	fmt.Printf("subnet=%+v.\n", subnet)
 	defer networking.DeleteSubnet(t, client, subnet.ID)
 
-	// Create port
-	port, err := networking.CreatePort(t, client, networkID, subnet.ID)
+	router, err := layer3.CreateRouter(t, client, network.ID)
+	if err != nil {
+		t.Fatalf("Unable to create router: %v", err)
+	}
+	defer layer3.DeleteRouter(t, client, router.ID)
+
+	port, err := networking.CreatePort(t, client, network.ID, subnet.ID)
 	if err != nil {
 		t.Fatalf("Unable to create port: %v", err)
 	}
-	fmt.Printf("port=%+v.\n", port)
-	defer networking.DeletePort(t, client, port.ID)
+
+	_, err = layer3.CreateRouterInterface(t, client, port.ID, router.ID)
+	if err != nil {
+		t.Fatalf("Unable to create router interface: %v", err)
+	}
+	defer layer3.DeleteRouterInterface(t, client, port.ID, router.ID)
 
 	rule, err := CreateRule(t, client)
 	if err != nil {
@@ -159,11 +161,19 @@ func TestFirewallGroupCRUDPort(t *testing.T) {
 	tools.PrintResource(t, firewall_group)
 
 	// Create second port
-	port2, err := networking.CreatePort(t, client, networkID, subnet.ID)
+	port2, err := networking.CreatePort(t, client, network.ID, subnet.ID)
 	if err != nil {
-		t.Fatalf("Unable to create port: %v", err)
+		t.Fatalf("Unable to create port 2: %v", err)
 	}
-	defer networking.DeletePort(t, client, port2.ID)
+	//deleting router interface will delete?
+	//defer networking.DeletePort(t, client, port2.ID)
+
+	// And interface it to router
+	_, err = layer3.CreateRouterInterface(t, client, port2.ID, router.ID)
+	if err != nil {
+		t.Fatalf("Unable to create router interface 2: %v", err)
+	}
+	defer layer3.DeleteRouterInterface(t, client, port2.ID, router.ID)
 
 	firewallGroupUpdateOpts := firewall_groups.UpdateOpts{
 		IngressPolicyID:	policy.ID,
@@ -263,4 +273,3 @@ func TestFirewallGroupCRUDRemovePort(t *testing.T) {
 
 	tools.PrintResource(t, newFirewallGroup)
 }
-*/

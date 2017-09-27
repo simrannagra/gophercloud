@@ -31,6 +31,28 @@ func TestPolicyList(t *testing.T) {
 	}
 }
 
+func TestPoliciesDelete(t *testing.T) {
+	client, err := clients.NewNetworkV2Client()
+	if err != nil {
+		t.Fatalf("Unable to create a network client: %v", err)
+	}
+
+	allPages, err := policies.List(client, nil).AllPages()
+	if err != nil {
+		t.Fatalf("Unable to list policies: %v", err)
+	}
+
+	allPolicies, err := policies.ExtractPolicies(allPages)
+	if err != nil {
+		t.Fatalf("Unable to extract policies: %v", err)
+	}
+
+	for _, policy := range allPolicies {
+		tools.PrintResource(t, policy)
+		DeletePolicy(t, client, policy.ID)
+	}
+}
+
 func TestPolicyCRUD(t *testing.T) {
 	client, err := clients.NewNetworkV2Client()
 	if err != nil {
