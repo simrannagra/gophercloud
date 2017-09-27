@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"testing"
+	//"time"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/acceptance/tools"
@@ -32,14 +33,13 @@ func CreateFirewallGroup(t *testing.T, client *gophercloud.ServiceClient, policy
 	if err != nil {
 		return firewall_group, err
 	}
-	//fmt.Printf("Created firewall_group=%+v.\n", firewall_group)
+	fmt.Printf("Created firewall_group=%+v.\n", firewall_group)
 
-	/*
 	// NOT ACTIVE if not connected to subnet, so don't wait?
 	t.Logf("Waiting for firewall group to become active.")
 	if err := WaitForFirewallGroupState(client, firewall_group.ID, "ACTIVE", 60); err != nil {
 		return firewall_group, err
-	} */
+	}
 
 	t.Logf("Successfully created firewall group %s", firewallName)
 
@@ -57,7 +57,7 @@ func CreateFirewallGroupOnPort(t *testing.T, client *gophercloud.ServiceClient, 
 	firewallGroupCreateOpts := firewall_groups.CreateOpts{
 		Name:     			firewallName,
 		IngressPolicyID:	policyID,
-		EgressPolicyID:		policyID,
+		//EgressPolicyID:		policyID,
 	}
 
 	createOpts := routerinsertion.CreateOptsExt{
@@ -69,9 +69,10 @@ func CreateFirewallGroupOnPort(t *testing.T, client *gophercloud.ServiceClient, 
 	if err != nil {
 		return firewall_group, err
 	}
+	fmt.Printf("Created firewall_group=%+v.\n", firewall_group)
 
 	t.Logf("Waiting for firewall group to become active.")
-	if err := WaitForFirewallGroupState(client, firewall_group.ID, "ACTIVE", 60); err != nil {
+	if err := WaitForFirewallGroupState(client, firewall_group.ID, "ACTIVE", 300); err != nil {
 		return firewall_group, err
 	}
 
@@ -188,6 +189,8 @@ func DeleteRule(t *testing.T, client *gophercloud.ServiceClient, ruleID string) 
 func WaitForFirewallGroupState(client *gophercloud.ServiceClient, firewallID, status string, secs int) error {
 	return gophercloud.WaitFor(secs, func() (bool, error) {
 		current, err := firewall_groups.Get(client, firewallID).Extract()
+		fmt.Printf("WaitForFirewallGroupState got fg=%+v\n.", current)
+		//time.Sleep(5000)
 		if err != nil {
 			if httpStatus, ok := err.(gophercloud.ErrDefault404); ok {
 				if httpStatus.Actual == 404 {

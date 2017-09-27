@@ -8,7 +8,7 @@ import (
 
 	"github.com/gophercloud/gophercloud/acceptance/clients"
 	"github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2/extensions/layer3"
-	//"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	networking "github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2"
 	//compute "github.com/gophercloud/gophercloud/acceptance/openstack/compute/v2"
 	"github.com/gophercloud/gophercloud/acceptance/tools"
@@ -95,37 +95,37 @@ func TestFirewallGroupCRUDPort(t *testing.T) {
 		t.Fatalf("Unable to create a network client: %v", err)
 	}
 
-	/*choices, err := clients.AcceptanceTestChoicesFromEnv()
+	choices, err := clients.AcceptanceTestChoicesFromEnv()
 	if err != nil {
 		t.Fatal(err)
-	}*/
+	}
 
-	/*netid, err := networks.IDFromName(client, choices.NetworkName)
+	netid, err := networks.IDFromName(client, choices.NetworkName)
 	if err != nil {
 		t.Fatalf("Unable to find network id: %v", err)
-	}*/
+	}
 
-	// Create a network
+	/*// Create a network
 	network, err := networking.CreateNetwork(t, client)
 	if err != nil {
 		t.Fatalf("Unable to create network: %v", err)
 	}
-	defer networking.DeleteNetwork(t, client, network.ID)
+	defer networking.DeleteNetwork(t, client, network.ID) */
 
-	tools.PrintResource(t, network)
-	subnet, err := networking.CreateSubnet(t, client, network.ID)
+	//tools.PrintResource(t, network)
+	subnet, err := networking.CreateSubnet(t, client, netid)
 	if err != nil {
 		t.Fatalf("Unable to create subnet: %v", err)
 	}
 	defer networking.DeleteSubnet(t, client, subnet.ID)
 
-	router, err := layer3.CreateRouter(t, client, network.ID)
+	router, err := layer3.CreateExternalRouter(t, client)
 	if err != nil {
 		t.Fatalf("Unable to create router: %v", err)
 	}
 	defer layer3.DeleteRouter(t, client, router.ID)
 
-	port, err := networking.CreatePort(t, client, network.ID, subnet.ID)
+	port, err := networking.CreatePort(t, client, netid, subnet.ID)
 	if err != nil {
 		t.Fatalf("Unable to create port: %v", err)
 	}
@@ -161,7 +161,7 @@ func TestFirewallGroupCRUDPort(t *testing.T) {
 	tools.PrintResource(t, firewall_group)
 
 	// Create second port
-	port2, err := networking.CreatePort(t, client, network.ID, subnet.ID)
+	port2, err := networking.CreatePort(t, client, netid, subnet.ID)
 	if err != nil {
 		t.Fatalf("Unable to create port 2: %v", err)
 	}
