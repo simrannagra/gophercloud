@@ -27,9 +27,10 @@ func TestCreate(t *testing.T) {
         "name": "fw",
         "description": "OpenStack firewall",
         "admin_state_up": true,
-        "firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+        "ingress_firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+        "egress_firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
         "tenant_id": "b4eedccc6fb74fa8a7ad6b08382b852b",
-        "router_ids": [
+        "ports": [
           "8a3a0d6a-34b5-4a92-b65d-6375a4c1e9e8"
         ]
     }
@@ -47,7 +48,8 @@ func TestCreate(t *testing.T) {
         "description": "OpenStack firewall",
         "admin_state_up": true,
         "tenant_id": "b4eedccc6fb74fa8a7ad6b08382b852b",
-        "firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c"
+        "ingress_firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+        "egress_firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c"
     }
 }
     `)
@@ -85,9 +87,10 @@ func TestCreateWithNoRouters(t *testing.T) {
         "name": "fw",
         "description": "OpenStack firewall",
         "admin_state_up": true,
-        "firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+        "ingress_firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
+        "egress_firewall_policy_id": "19ab8c87-4a32-4e6a-a74e-b77fffb89a0c",
         "tenant_id": "b4eedccc6fb74fa8a7ad6b08382b852b",
-        "router_ids": []
+        "ports": []
     }
 }
       `)

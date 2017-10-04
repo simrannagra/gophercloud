@@ -213,7 +213,7 @@ func WaitForRouterInterfaceToAttach(client *gophercloud.ServiceClient, routerInt
 		r, err := ports.Get(client, routerInterfaceID).Extract()
 		fmt.Printf("WaitForRouterInterfaceToAttach got port=%+v\n.", r)
 		if err != nil {
-			fmt.Printf("WaitForRouterInterfaceToAttach returning error.\n")
+			fmt.Printf("WaitForRouterInterfaceToAttach returning error=%s.\n", err.Error())
 			return false, err
 		}
 

@@ -205,38 +205,49 @@ func TestFirewallGroupCRUDRemovePort(t *testing.T) {
 		t.Fatalf("Unable to create a network client: %v", err)
 	}
 
+	/*choices, err := clients.AcceptanceTestChoicesFromEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	netid, err := networks.IDFromName(client, choices.NetworkName)
+	if err != nil {
+		t.Fatalf("Unable to find network id: %v", err)
+	} */
+
 	// Create Network
 	network, err := networking.CreateNetwork(t, client)
 	if err != nil {
 		t.Fatalf("Unable to create network: %v", err)
 	}
 	defer networking.DeleteNetwork(t, client, network.ID)
+	netid := network.ID
 
 	// Create Subnet
-	subnet, err := networking.CreateSubnet(t, client, network.ID)
+	subnet, err := networking.CreateSubnet(t, client, netid)
 	if err != nil {
 		t.Fatalf("Unable to create subnet: %v", err)
 	}
 	defer networking.DeleteSubnet(t, client, subnet.ID)
 
-        router, err := layer3.CreateExternalRouter(t, client)
-        if err != nil {
-                t.Fatalf("Unable to create router: %v", err)
-        }
-        defer layer3.DeleteRouter(t, client, router.ID)
+	router, err := layer3.CreateExternalRouter(t, client)
+	if err != nil {
+			t.Fatalf("Unable to create router: %v", err)
+	}
+	defer layer3.DeleteRouter(t, client, router.ID)
 
 	// Create port
-	port, err := networking.CreatePort(t, client, network.ID, subnet.ID)
+	port, err := networking.CreatePort(t, client, netid, subnet.ID)
 	if err != nil {
 		t.Fatalf("Unable to create port: %v", err)
 	}
 	//defer networking.DeletePort(t, client, port.ID)
 
-        _, err = layer3.CreateRouterInterface(t, client, port.ID, router.ID)
-        if err != nil {
-                t.Fatalf("Unable to create router interface: %v", err)
-        }
-        defer layer3.DeleteRouterInterface(t, client, port.ID, router.ID)
+	_, err = layer3.CreateRouterInterface(t, client, port.ID, router.ID)
+	if err != nil {
+			t.Fatalf("Unable to create router interface: %v", err)
+	}
+	defer layer3.DeleteRouterInterface(t, client, port.ID, router.ID)
 
 	rule, err := CreateRule(t, client)
 	if err != nil {
