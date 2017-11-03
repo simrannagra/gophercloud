@@ -85,7 +85,7 @@ type CreateOpts struct {
 	// The port on which to listen for client traffic.
 	ProtocolPort int `json:"protocol_port" required:"true"`
 	// Indicates the owner of the Listener. Required for admins.
-	TenantID string `json:"tenant_id,omitempty"`
+	Tenant_ID string `json:"tenant_id,omitempty"`
 	// Human-readable name for the Listener. Does not have to be unique.
 	Name string `json:"name,omitempty"`
 	// The ID of the default pool with which the Listener is associated.

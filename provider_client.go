@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 	//"reflect"
+	"fmt"
 )
 
 // DefaultUserAgent is the default User-Agent string set in the request header.
@@ -117,6 +118,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 	//fmt.Printf("Request method: %s, url: %s, options=%+v.\n", method, url, options)
 	// Derive the content body by either encoding an arbitrary object as JSON, or by taking a provided
 	// io.ReadSeeker as-is. Default the content-type to application/json.
+	fmt.Printf("Request: %+v.\n", options)
 	if options.JSONBody != nil {
 		if options.RawBody != nil {
 			panic("Please provide only one of JSONBody or RawBody to gophercloud.Request().")
@@ -128,7 +130,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 		}
 
 		body = bytes.NewReader(rendered)
-		//fmt.Printf("Request body: %s.\n", body)
+		fmt.Printf("Request body: %s.\n", body)
 		contentType = &applicationJSON
 	}
 
@@ -192,6 +194,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 	if !ok {
 		body, _ := ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
+		fmt.Printf("Error body: %s.\n", body)
 		//pc := make([]uintptr, 1)
 		//runtime.Callers(2, pc)
 		//f := runtime.FuncForPC(pc[0])

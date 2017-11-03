@@ -4,7 +4,7 @@ import "github.com/gophercloud/gophercloud"
 
 const (
 	rootPath     = "elbaas"
-	resourcePath = "loadbalancer_elbs"
+	resourcePath = "loadbalancers"
 	statusPath   = "statuses"
 )
 

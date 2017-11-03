@@ -10,7 +10,6 @@ import (
 // the virtual IP address on which client traffic is received, as well
 // as other details such as the load balancing method to be use, protocol, etc.
 type LoadBalancer struct {
-	// TenantID
     Tenant_ID           string `json:"tenant_id"`
     // Human-readable name for the LoadBalancer. Does not have to be unique.
 	Name string `json:"name"`

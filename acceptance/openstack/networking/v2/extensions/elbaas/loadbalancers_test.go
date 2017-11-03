@@ -4,6 +4,8 @@ package elbaas
 
 import (
 	"testing"
+	"os"
+    "fmt"
 
 	"github.com/gophercloud/gophercloud/acceptance/clients"
 	networking "github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2"
@@ -14,15 +16,17 @@ import (
 )
 
 func TestLoadbalancersList(t *testing.T) {
-	client, err := clients.NewNetworkV2Client()
+	client, err := clients.NewOtcV1Client("elb")
 	if err != nil {
 		t.Fatalf("Unable to create a network client: %v", err)
 	}
-
+    fmt.Printf("before  loadbalancer_elbs.List \n")
 	allPages, err := loadbalancer_elbs.List(client, nil).AllPages()
 	if err != nil {
 		t.Fatalf("Unable to list loadbalancers: %v", err)
 	}
+    fmt.Printf("after  loadbalancer_elbs.List \n")
+	
 
 	allLoadbalancers, err := loadbalancer_elbs.ExtractLoadBalancers(allPages)
 	if err != nil {
@@ -52,13 +56,18 @@ func TestLoadbalancersCRUD(t *testing.T) {
 	}
 	defer networking.DeleteSubnet(t, client, subnet.ID)
 
-	lb, err := CreateLoadBalancer(t, client, subnet.ID)
+	clientlb, err := clients.NewOtcV1Client("elb")
+	if err != nil {
+		t.Fatalf("Unable to create an elb client: %v", err)
+	}
+	tenantID := os.Getenv("OS_TENANT_ID")
+	lb, err := CreateLoadBalancer(t, clientlb, subnet.ID, tenantID, os.Getenv("OS_VPC_ID"), "External")
 	if err != nil {
 		t.Fatalf("Unable to create loadbalancer: %v", err)
 	}
-	defer DeleteLoadBalancer(t, client, lb.ID)
+	defer DeleteLoadBalancer(t, clientlb, lb.ID)
 
-	newLB, err := loadbalancer_elbs.Get(client, lb.ID).Extract()
+	newLB, err := loadbalancer_elbs.Get(clientlb, lb.ID).Extract()
 	if err != nil {
 		t.Fatalf("Unable to get loadbalancer: %v", err)
 	}
@@ -69,25 +78,25 @@ func TestLoadbalancersCRUD(t *testing.T) {
 	// this test will include some other resources.
 
 	// Listener
-	listener, err := CreateListener(t, client, lb)
+	listener, err := CreateListener(t, clientlb, lb)
 	if err != nil {
 		t.Fatalf("Unable to create listener: %v", err)
 	}
-	defer DeleteListener(t, client, lb.ID, listener.ID)
+	defer DeleteListener(t, clientlb, lb.ID, listener.ID)
 
 	updateListenerOpts := listeners.UpdateOpts{
 		Description: "Some listener description",
 	}
-	_, err = listeners.Update(client, listener.ID, updateListenerOpts).Extract()
+	_, err = listeners.Update(clientlb, listener.ID, updateListenerOpts).Extract()
 	if err != nil {
 		t.Fatalf("Unable to update listener")
 	}
 
-	if err := WaitForLoadBalancerState(client, lb.ID, "ACTIVE", loadbalancerActiveTimeoutSeconds); err != nil {
+	if err := WaitForLoadBalancerState(clientlb, lb.ID, true, loadbalancerActiveTimeoutSeconds); err != nil {
 		t.Fatalf("Timed out waiting for loadbalancer to become active")
 	}
 
-	newListener, err := listeners.Get(client, listener.ID).Extract()
+	newListener, err := listeners.Get(clientlb, listener.ID).Extract()
 	if err != nil {
 		t.Fatalf("Unable to get listener")
 	}

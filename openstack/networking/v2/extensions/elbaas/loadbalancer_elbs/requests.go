@@ -3,6 +3,7 @@ package loadbalancer_elbs
 import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/pagination"
+	"fmt"
 )
 
 // ListOptsBuilder allows extensions to add additional parameters to the
@@ -52,6 +53,7 @@ func (opts ListOpts) ToLoadBalancerListQuery() (string, error) {
 // tenant who submits the request, unless an admin user submits the request.
 func List(c *gophercloud.ServiceClient, opts ListOptsBuilder) pagination.Pager {
 	url := rootURL(c)
+	fmt.Printf("url=%s.\n", url)
 	if opts != nil {
 		query, err := opts.ToLoadBalancerListQuery()
 		if err != nil {
@@ -76,7 +78,7 @@ type CreateOptsBuilder interface {
 // operation.
 type CreateOpts struct {
     // Required. The tenant operator id
-    Tenant_ID  string `jason:"tenant_id" required:"true"`
+    Tenant_ID  string `json:"tenant_id" required:"true"`
 	// Optional. Human-readable name for the Loadbalancer. Does not have to be unique.
 	Name string `json:"name,omitempty"`
 	// Optional. Human-readable description for the Loadbalancer.
@@ -115,7 +117,7 @@ type CreateOpts struct {
 
 // ToLoadBalancerCreateMap casts a CreateOpts struct to a map.
 func (opts CreateOpts) ToLoadBalancerCreateMap() (map[string]interface{}, error) {
-	return gophercloud.BuildRequestBody(opts, "loadbalancer")
+	return gophercloud.BuildRequestBody(opts, "")
 }
 
 // Create is an operation which provisions a new loadbalancer based on the
@@ -131,6 +133,7 @@ func Create(c *gophercloud.ServiceClient, opts CreateOptsBuilder) (r CreateResul
 		r.Err = err
 		return
 	}
+	fmt.Printf("Create (%+v): rootURL: %s, b=%+v.\n", c, rootURL(c), b)
 	_, r.Err = c.Post(rootURL(c), b, &r.Body, nil)
 	return
 }
