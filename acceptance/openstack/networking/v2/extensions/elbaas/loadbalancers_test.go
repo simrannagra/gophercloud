@@ -8,7 +8,7 @@ import (
     "fmt"
 
 	"github.com/gophercloud/gophercloud/acceptance/clients"
-	networking "github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2"
+	//networking "github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2"
 	"github.com/gophercloud/gophercloud/acceptance/tools"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/listeners"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs"
@@ -39,29 +39,12 @@ func TestLoadbalancersList(t *testing.T) {
 }
 
 func TestLoadbalancersCRUD(t *testing.T) {
-	client, err := clients.NewNetworkV2Client()
-	if err != nil {
-		t.Fatalf("Unable to create a network client: %v", err)
-	}
-
-	network, err := networking.CreateNetwork(t, client)
-	if err != nil {
-		t.Fatalf("Unable to create network: %v", err)
-	}
-	defer networking.DeleteNetwork(t, client, network.ID)
-
-	subnet, err := networking.CreateSubnet(t, client, network.ID)
-	if err != nil {
-		t.Fatalf("Unable to create subnet: %v", err)
-	}
-	defer networking.DeleteSubnet(t, client, subnet.ID)
-
 	clientlb, err := clients.NewOtcV1Client("elb")
 	if err != nil {
 		t.Fatalf("Unable to create an elb client: %v", err)
 	}
 	tenantID := os.Getenv("OS_TENANT_ID")
-	lb, err := CreateLoadBalancer(t, clientlb, subnet.ID, tenantID, os.Getenv("OS_VPC_ID"), "External")
+	lb, err := CreateLoadBalancer(t, clientlb, "", tenantID, os.Getenv("OS_VPC_ID"), "External")
 	if err != nil {
 		t.Fatalf("Unable to create loadbalancer: %v", err)
 	}
@@ -92,7 +75,7 @@ func TestLoadbalancersCRUD(t *testing.T) {
 		t.Fatalf("Unable to update listener")
 	}
 
-	if err := WaitForLoadBalancerState(clientlb, lb.ID, true, loadbalancerActiveTimeoutSeconds); err != nil {
+	if err := WaitForLoadBalancerState(clientlb, lb.ID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
 		t.Fatalf("Timed out waiting for loadbalancer to become active")
 	}
 

@@ -38,7 +38,7 @@ func CreateListener(t *testing.T, client *gophercloud.ServiceClient, lb *loadbal
 
 	t.Logf("Successfully created listener %s", listenerName)
 
-	if err := WaitForLoadBalancerState(client, lb.ID, true, loadbalancerActiveTimeoutSeconds); err != nil {
+	if err := WaitForLoadBalancerState(client, lb.ID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
 		return listener, fmt.Errorf("Timed out waiting for loadbalancer to become active")
 	}
 
@@ -53,11 +53,12 @@ func CreateLoadBalancer(t *testing.T, client *gophercloud.ServiceClient, subnetI
 	t.Logf("Attempting to create loadbalancer %s on subnet %s", lbName, subnetID)
 
 	createOpts := loadbalancer_elbs.CreateOpts{
-		Tenant_ID: 	  tenantID,
+		//Tenant_ID: 	  tenantID,
 		VpcID: 		  vpcID,
 		Name:         lbName,
+		Bandwidth:	  5,	// Must not be passed in for Internal
 		Type:		  lb_type,
-		VipSubnetID:  subnetID,
+		VipSubnetID:  subnetID,	// Must be blank for External, required for Internal
 		AdminStateUp: gophercloud.Enabled,
 	}
 
@@ -69,7 +70,7 @@ func CreateLoadBalancer(t *testing.T, client *gophercloud.ServiceClient, subnetI
 	t.Logf("Successfully created loadbalancer %s on subnet %s", lbName, subnetID)
 	t.Logf("Waiting for loadbalancer %s to become active", lbName)
 
-	if err := WaitForLoadBalancerState(client, lb.ID, true, loadbalancerActiveTimeoutSeconds); err != nil {
+	if err := WaitForLoadBalancerState(client, lb.ID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
 		return lb, err
 	}
 
@@ -123,7 +124,7 @@ func CreateMonitor(t *testing.T, client *gophercloud.ServiceClient, lb *loadbala
 
 	t.Logf("Successfully created monitor: %s", monitorName)
 
-	if err := WaitForLoadBalancerState(client, lb.ID, true, loadbalancerActiveTimeoutSeconds); err != nil {
+	if err := WaitForLoadBalancerState(client, lb.ID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
 		return monitor, fmt.Errorf("Timed out waiting for loadbalancer to become active")
 	}
 
@@ -171,7 +172,7 @@ func DeleteListener(t *testing.T, client *gophercloud.ServiceClient, lbID, liste
 		t.Fatalf("Unable to delete listener: %v", err)
 	}
 
-	if err := WaitForLoadBalancerState(client, lbID, true, loadbalancerActiveTimeoutSeconds); err != nil {
+	if err := WaitForLoadBalancerState(client, lbID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
 		t.Fatalf("Timed out waiting for loadbalancer to become active")
 	}
 
@@ -227,7 +228,7 @@ func DeleteMonitor(t *testing.T, client *gophercloud.ServiceClient, lbID, monito
 		t.Fatalf("Unable to delete monitor: %v", err)
 	}
 
-	if err := WaitForLoadBalancerState(client, lbID, true, loadbalancerActiveTimeoutSeconds); err != nil {
+	if err := WaitForLoadBalancerState(client, lbID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
 		t.Fatalf("Timed out waiting for loadbalancer to become active")
 	}
 
@@ -237,7 +238,7 @@ func DeleteMonitor(t *testing.T, client *gophercloud.ServiceClient, lbID, monito
 
 
 // WaitForLoadBalancerState will wait until a loadbalancer reaches a given state.
-func WaitForLoadBalancerState(client *gophercloud.ServiceClient, lbID string, status bool, secs int) error {
+func WaitForLoadBalancerState(client *gophercloud.ServiceClient, lbID string, status int, secs int) error {
 	return gophercloud.WaitFor(secs, func() (bool, error) {
 		current, err := loadbalancer_elbs.Get(client, lbID).Extract()
 		if err != nil {

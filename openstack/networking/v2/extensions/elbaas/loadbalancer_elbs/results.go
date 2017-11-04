@@ -22,7 +22,7 @@ type LoadBalancer struct {
     //
     Type        string `json:"type"`
     // The administrative state of the Loadbalancer. A valid value is true (UP) or false (DOWN).
-	AdminStateUp bool `json:"admin_state_up"`
+	AdminStateUp int `json:"admin_state_up"`
 	// The UUID of the subnet on which to allocate the virtual IP for the Loadbalancer address.
 	VipSubnetID string `json:"vip_subnet_id"`
     // az

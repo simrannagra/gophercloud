@@ -77,8 +77,8 @@ type CreateOptsBuilder interface {
 // CreateOpts is the common options struct used in this package's Create
 // operation.
 type CreateOpts struct {
-    // Required. The tenant operator id
-    Tenant_ID  string `json:"tenant_id" required:"true"`
+    // Required. The tenant operator id, or is it?
+    Tenant_ID  string `json:"tenant_id,omitempty"` // required:"true"`
 	// Optional. Human-readable name for the Loadbalancer. Does not have to be unique.
 	Name string `json:"name,omitempty"`
 	// Optional. Human-readable description for the Loadbalancer.
@@ -97,7 +97,7 @@ type CreateOpts struct {
 	AdminStateUp *bool `json:"admin_state_up,omitempty"`
     // Required Specifies the ID of the private network to be added. This parameter is mandatory when type 
     // is set to Internal, and it is invalid when type is set to External. 
-    VipSubnetID string `json:"vip_subnet_id" required:"true"`
+    VipSubnetID string `json:"vip_subnet_id,omitempty"`
     // Optional  Specifies the ID of the availability zone (AZ). This parameter is mandatory when type 
     // is set to Internal, and it is invalid when type is set to External.
     AZ          string `json:"az,omitempty"`
