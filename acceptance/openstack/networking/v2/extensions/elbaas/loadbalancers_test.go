@@ -10,7 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud/acceptance/clients"
 	//networking "github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2"
 	"github.com/gophercloud/gophercloud/acceptance/tools"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/listeners"
+	//"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/listeners"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs"
 	//"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/monitors"
 )
@@ -61,7 +61,7 @@ func TestLoadbalancersCRUD(t *testing.T) {
 	// this test will include some other resources.
 
 	// Listener
-	listener, err := CreateListener(t, clientlb, lb)
+	/*listener, err := CreateListener(t, clientlb, lb)
 	if err != nil {
 		t.Fatalf("Unable to create listener: %v", err)
 	}
@@ -85,6 +85,7 @@ func TestLoadbalancersCRUD(t *testing.T) {
 	}
 
 	tools.PrintResource(t, newListener)
+	*/
 
 	/*
 	// Pool

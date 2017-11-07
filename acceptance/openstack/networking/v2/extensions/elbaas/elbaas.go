@@ -62,21 +62,39 @@ func CreateLoadBalancer(t *testing.T, client *gophercloud.ServiceClient, subnetI
 		AdminStateUp: gophercloud.Enabled,
 	}
 
-	lb, err := loadbalancer_elbs.Create(client, createOpts).Extract()
+	job, err := loadbalancer_elbs.Create(client, createOpts).ExtractJobResponse()
 	if err != nil {
-		return lb, err
+		return nil, err
 	}
+
+	fmt.Printf("job=%+v.\n", job)
 
 	t.Logf("Successfully created loadbalancer %s on subnet %s", lbName, subnetID)
 	t.Logf("Waiting for loadbalancer %s to become active", lbName)
 
-	if err := WaitForLoadBalancerState(client, lb.ID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
-		return lb, err
+	if err := WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
+		return nil, err
 	}
 
+	mlb, err := GetJobEntity(client, job.URI,"elb")
+	fmt.Printf("mlb=%+v.\n", mlb)
 	t.Logf("LoadBalancer %s is active", lbName)
 
-	return lb, nil
+	if vid, ok := mlb["id"]; ok {
+		fmt.Printf("vid=%s.\n", vid)
+		if id, ok := vid.(string); ok {
+			fmt.Printf("id=%s.\n", id)
+			lb, err := loadbalancer_elbs.Get(client, id).Extract()
+			if err != nil {
+				fmt.Printf("Error: %s.\n", err.Error())
+				return nil, err
+			}
+			fmt.Printf("lb=%+v.\n", lb)
+			return lb, err
+		}
+	}
+
+	return nil, err
 }
 
 // CreateMember will create a member with a random name, port, address, and
@@ -235,7 +253,45 @@ func DeleteMonitor(t *testing.T, client *gophercloud.ServiceClient, lbID, monito
 	t.Logf("Successfully deleted monitor %s", monitorID)
 }
 
+func WaitForJobSuccess(client *gophercloud.ServiceClient, uri string, secs int) error {
+	return gophercloud.WaitFor(secs, func() (bool, error) {
+		job := new(loadbalancer_elbs.JobStatus)
+		_, err := client.Get("https://elb.eu-de.otc.t-systems.com" + uri, &job, nil)
+		if err != nil {
+			return false, err
+		}
+		fmt.Printf("JobStatus: %+v.\n", job)
 
+		if job.Status == "SUCCESS" {
+			return true, nil
+		}
+		if job.Status == "FAIL" {
+			err = fmt.Errorf("Job failed with code %s: %s.\n", job.ErrorCode, job.FailReason)
+			return false, err
+		}
+
+		return false, nil
+	})
+}
+
+func GetJobEntity(client *gophercloud.ServiceClient, uri string, label string) (map[string]interface{}, error) {
+	job := new(loadbalancer_elbs.JobStatus)
+	_, err := client.Get("https://elb.eu-de.otc.t-systems.com" + uri, &job, nil)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("JobStatus: %+v.\n", job)
+
+	if job.Status == "SUCCESS" {
+		if e := job.Entities[label]; e != nil {
+			if m, ok := e.(map[string]interface{}); ok {
+				return m, nil
+			}
+		}
+	}
+
+	return nil, nil
+}
 
 // WaitForLoadBalancerState will wait until a loadbalancer reaches a given state.
 func WaitForLoadBalancerState(client *gophercloud.ServiceClient, lbID string, status int, secs int) error {

@@ -4,6 +4,7 @@ import (
 	"github.com/gophercloud/gophercloud"
 	// "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/listeners"
 	"github.com/gophercloud/gophercloud/pagination"
+	"fmt"
 )
 
 // LoadBalancer is the primary load balancing configuration object that specifies
@@ -41,6 +42,20 @@ type LoadBalancer struct {
 	ID string `json:"id"`
 
 
+}
+
+type JobResponse struct {
+	URI string `json:"uri"`
+	JobID string `json:"job_id"`
+}
+
+type JobStatus struct {
+	Status string `json:"status"`
+	Entities map[string]interface{} `json:"entities"`
+	JobID string `json:"job_id"`
+	JobType string `json:"job_type"`
+	ErrorCode string `json:"error_code"`
+	FailReason string `json:"fail_reason"`
 }
 
 type StatusTree struct {
@@ -88,13 +103,30 @@ type commonResult struct {
 	gophercloud.Result
 }
 
+func (r commonResult) ExtractJobResponse() (*JobResponse, error) {
+	job := new(JobResponse)
+	err := r.ExtractInto(job)
+	return job, err
+}
+
+func (r commonResult) ExtractJobStatus() (*JobStatus, error) {
+	job := new(JobStatus)
+	err := r.ExtractInto(job)
+	return job, err
+}
+
 // Extract is a function that accepts a result and extracts a router.
 func (r commonResult) Extract() (*LoadBalancer, error) {
-	var s struct {
-		LoadBalancer *LoadBalancer `json:"loadbalancer"`
+	fmt.Printf("Extracting...\n")
+	lb := new(LoadBalancer)
+	err := r.ExtractInto(lb)
+	if err != nil {
+		fmt.Printf("Error: %s.\n", err.Error())
+		return nil, err
+	} else {
+		fmt.Printf("Returning extract: %+v.\n", lb)
+		return lb, nil
 	}
-	err := r.ExtractInto(&s)
-	return s.LoadBalancer, err
 }
 
 type GetStatusesResult struct {
