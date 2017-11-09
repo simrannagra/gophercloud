@@ -78,20 +78,26 @@ type CreateOptsBuilder interface {
 // CreateOpts is the common options struct used in this package's Create
 // operation.
 type CreateOpts struct {
+	// Human-readable name for the Listener. Does not have to be unique.
+	Name string `json:"name", required:"true"`
+	// Human-readable description for the Listener.
+	Description string `json:"description,omitempty"`
 	// The load balancer on which to provision this listener.
 	LoadbalancerID string `json:"loadbalancer_id" required:"true"`
 	// The protocol - can either be TCP, HTTP or HTTPS.
 	Protocol Protocol `json:"protocol" required:"true"`
 	// The port on which to listen for client traffic.
-	ProtocolPort int `json:"protocol_port" required:"true"`
+	ProtocolPort int `json:"port" required:"true"`
+	// The protocol - can either be TCP, HTTP or HTTPS.
+	BackendProtocol Protocol `json:"backend_protocol" required:"true"`
+	// The port on which to listen for client traffic.
+	BackendProtocolPort int `json:"backend_port" required:"true"`
+	Algorithm string `json:"lb_algorithm" required:"true"`
+	SessionSticky bool `json:"session_sticky,omit_empty"`
 	// Indicates the owner of the Listener. Required for admins.
 	Tenant_ID string `json:"tenant_id,omitempty"`
-	// Human-readable name for the Listener. Does not have to be unique.
-	Name string `json:"name,omitempty"`
 	// The ID of the default pool with which the Listener is associated.
 	DefaultPoolID string `json:"default_pool_id,omitempty"`
-	// Human-readable description for the Listener.
-	Description string `json:"description,omitempty"`
 	// The maximum number of connections allowed for the Listener.
 	ConnLimit *int `json:"connection_limit,omitempty"`
 	// A reference to a container of TLS secrets.
@@ -105,7 +111,7 @@ type CreateOpts struct {
 
 // ToListenerCreateMap casts a CreateOpts struct to a map.
 func (opts CreateOpts) ToListenerCreateMap() (map[string]interface{}, error) {
-	return gophercloud.BuildRequestBody(opts, "listener")
+	return gophercloud.BuildRequestBody(opts, "")
 }
 
 // Create is an operation which provisions a new Listeners based on the
@@ -121,7 +127,9 @@ func Create(c *gophercloud.ServiceClient, opts CreateOptsBuilder) (r CreateResul
 		r.Err = err
 		return
 	}
-	_, r.Err = c.Post(rootURL(c), b, &r.Body, nil)
+	_, r.Err = c.Post(rootURL(c), b, &r.Body, &gophercloud.RequestOpts{
+		OkCodes: []int{200},
+	})
 	return
 }
 
@@ -159,7 +167,7 @@ type UpdateOpts struct {
 
 // ToListenerUpdateMap casts a UpdateOpts struct to a map.
 func (opts UpdateOpts) ToListenerUpdateMap() (map[string]interface{}, error) {
-	return gophercloud.BuildRequestBody(opts, "listener")
+	return gophercloud.BuildRequestBody(opts, "")
 }
 
 // Update is an operation which modifies the attributes of the specified Listener.

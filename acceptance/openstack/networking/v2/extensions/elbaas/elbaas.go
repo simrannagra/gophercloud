@@ -24,16 +24,24 @@ func CreateListener(t *testing.T, client *gophercloud.ServiceClient, lb *loadbal
 
 	t.Logf("Attempting to create listener %s on port %d", listenerName, listenerPort)
 
-	createOpts := listeners.CreateOpts{
+	fmt.Printf("*******    before  listeners.CreateOpts  \n")
+
+    createOpts := listeners.CreateOpts{
 		Name:           listenerName,
 		LoadbalancerID: lb.ID,
 		Protocol:       "TCP",
 		ProtocolPort:   listenerPort,
+		BackendProtocol: "TCP",
+		BackendProtocolPort: listenerPort,
+		Algorithm:		 "roundrobin",
 	}
+    fmt.Printf("*******    after  listeners.CreateOpts %v+ \n", createOpts)
 
 	listener, err := listeners.Create(client, createOpts).Extract()
 	if err != nil {
-		return listener, err
+
+        t.Logf("Attempting to create listener %s on port %d failed err=%v", listenerName, listenerPort, err)
+        return listener, err
 	}
 
 	t.Logf("Successfully created listener %s", listenerName)

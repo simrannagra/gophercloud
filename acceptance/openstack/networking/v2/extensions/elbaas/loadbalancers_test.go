@@ -5,12 +5,12 @@ package elbaas
 import (
 	"testing"
 	"os"
-    "fmt"
+    //"fmt"
 
 	"github.com/gophercloud/gophercloud/acceptance/clients"
 	//networking "github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2"
 	"github.com/gophercloud/gophercloud/acceptance/tools"
-	//"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/listeners"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/listeners"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs"
 	//"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/monitors"
 )
@@ -20,12 +20,12 @@ func TestLoadbalancersList(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unable to create a network client: %v", err)
 	}
-    fmt.Printf("before  loadbalancer_elbs.List \n")
+    //fmt.Printf("before  loadbalancer_elbs.List \n")
 	allPages, err := loadbalancer_elbs.List(client, nil).AllPages()
 	if err != nil {
 		t.Fatalf("Unable to list loadbalancers: %v", err)
 	}
-    fmt.Printf("after  loadbalancer_elbs.List \n")
+    // fmt.Printf("after  loadbalancer_elbs.List \n")
 	
 
 	allLoadbalancers, err := loadbalancer_elbs.ExtractLoadBalancers(allPages)
@@ -61,7 +61,7 @@ func TestLoadbalancersCRUD(t *testing.T) {
 	// this test will include some other resources.
 
 	// Listener
-	/*listener, err := CreateListener(t, clientlb, lb)
+	listener, err := CreateListener(t, clientlb, lb)
 	if err != nil {
 		t.Fatalf("Unable to create listener: %v", err)
 	}
@@ -85,7 +85,7 @@ func TestLoadbalancersCRUD(t *testing.T) {
 	}
 
 	tools.PrintResource(t, newListener)
-	*/
+	
 
 	/*
 	// Pool

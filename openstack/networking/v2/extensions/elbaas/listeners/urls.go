@@ -3,7 +3,7 @@ package listeners
 import "github.com/gophercloud/gophercloud"
 
 const (
-	rootPath     = "lbaas"
+	rootPath     = "elbaas"
 	resourcePath = "listeners"
 )
 
