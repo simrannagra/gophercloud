@@ -12,7 +12,7 @@ import (
 	"github.com/gophercloud/gophercloud/acceptance/tools"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/listeners"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs"
-	//"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/monitors"
+	//"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/backendmember"
     "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/healthcheck"
 )
 
@@ -87,9 +87,7 @@ func TestLoadbalancersCRUD(t *testing.T) {
 
 	tools.PrintResource(t, newListener)
 	
-    //fmt.Printf("######   HEALTH!!!! \n")
-
-	// Health check 
+    // Health check 
     health, err := CreateHealth(t, clientlb, lb, listener)
 	if err != nil {
 		t.Fatalf("Unable to create health: %v", err)
@@ -117,85 +115,17 @@ func TestLoadbalancersCRUD(t *testing.T) {
 
 	tools.PrintResource(t, newHealth) 
 
-    /*
-    pool, err := CreatePool(t, client, lb)
+    // Backend Member  
+    backend, err, bId:= CreateBackend(t, clientlb, lb, listener)
 	if err != nil {
-		t.Fatalf("Unable to create pool: %v", err)
+		t.Fatalf("Unable to create backend: %v", err)
 	}
-	defer DeletePool(t, client, lb.ID, pool.ID)
+    fmt.Printf("######   BackEnd before DeleteBackend !!!! lb=%v+ backend=%v+ \n", lb, backend)
+    defer DeleteBackend(t, clientlb, lb.ID, listener.ID, bId)
 
-	updatePoolOpts := pools.UpdateOpts{
-		Description: "Some pool description",
-	}
-	_, err = pools.Update(client, pool.ID, updatePoolOpts).Extract()
-	if err != nil {
-		t.Fatalf("Unable to update pool")
-	}
 
-	if err := WaitForLoadBalancerState(client, lb.ID, "ACTIVE", loadbalancerActiveTimeoutSeconds); err != nil {
+	if err := WaitForLoadBalancerState(clientlb, lb.ID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
 		t.Fatalf("Timed out waiting for loadbalancer to become active")
 	}
-
-	newPool, err := pools.Get(client, pool.ID).Extract()
-	if err != nil {
-		t.Fatalf("Unable to get pool")
-	}
-
-	tools.PrintResource(t, newPool)
-
-	// Member
-	member, err := CreateMember(t, client, lb, newPool, subnet.ID, subnet.CIDR)
-	if err != nil {
-		t.Fatalf("Unable to create member: %v", err)
-	}
-	defer DeleteMember(t, client, lb.ID, pool.ID, member.ID)
-
-	newWeight := tools.RandomInt(11, 100)
-	updateMemberOpts := pools.UpdateMemberOpts{
-		Weight: newWeight,
-	}
-	_, err = pools.UpdateMember(client, pool.ID, member.ID, updateMemberOpts).Extract()
-	if err != nil {
-		t.Fatalf("Unable to update pool")
-	}
-
-	if err := WaitForLoadBalancerState(client, lb.ID, "ACTIVE", loadbalancerActiveTimeoutSeconds); err != nil {
-		t.Fatalf("Timed out waiting for loadbalancer to become active")
-	}
-
-	newMember, err := pools.GetMember(client, pool.ID, member.ID).Extract()
-	if err != nil {
-		t.Fatalf("Unable to get member")
-	}
-
-	tools.PrintResource(t, newMember)
-
-	// Monitor
-	monitor, err := CreateMonitor(t, client, lb, newPool)
-	if err != nil {
-		t.Fatalf("Unable to create monitor: %v", err)
-	}
-	defer DeleteMonitor(t, client, lb.ID, monitor.ID)
-
-	newDelay := tools.RandomInt(20, 30)
-	updateMonitorOpts := monitors.UpdateOpts{
-		Delay: newDelay,
-	}
-	_, err = monitors.Update(client, monitor.ID, updateMonitorOpts).Extract()
-	if err != nil {
-		t.Fatalf("Unable to update monitor")
-	}
-
-	if err := WaitForLoadBalancerState(client, lb.ID, "ACTIVE", loadbalancerActiveTimeoutSeconds); err != nil {
-		t.Fatalf("Timed out waiting for loadbalancer to become active")
-	}
-
-	newMonitor, err := monitors.Get(client, monitor.ID).Extract()
-	if err != nil {
-		t.Fatalf("Unable to get monitor")
-	}
-
-	tools.PrintResource(t, newMonitor)
-	*/
 
 }
