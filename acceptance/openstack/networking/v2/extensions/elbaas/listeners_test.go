@@ -11,11 +11,11 @@ import (
 )
 
 func TestListenersList(t *testing.T) {
-	client, err := clients.NewNetworkV2Client()
+    client, err := clients.NewOtcV1Client("elb")
 	if err != nil {
 		t.Fatalf("Unable to create a network client: %v", err)
 	}
-
+	
 	allPages, err := listeners.List(client, nil).AllPages()
 	if err != nil {
 		t.Fatalf("Unable to list listeners: %v", err)

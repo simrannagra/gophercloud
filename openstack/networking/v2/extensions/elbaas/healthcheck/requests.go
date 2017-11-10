@@ -19,23 +19,7 @@ type ListOptsBuilder interface {
 // sort by a particular Monitor attribute. SortDir sets the direction, and is
 // either `asc' or `desc'. Marker and Limit are used for pagination.
 type ListOpts struct {
-	ID            string `q:"id"`
-	Name          string `q:"name"`
-	TenantID      string `q:"tenant_id"`
-	PoolID        string `q:"pool_id"`
-	Type          string `q:"type"`
-	Delay         int    `q:"delay"`
-	Timeout       int    `q:"timeout"`
-	MaxRetries    int    `q:"max_retries"`
-	HTTPMethod    string `q:"http_method"`
-	URLPath       string `q:"url_path"`
-	ExpectedCodes string `q:"expected_codes"`
-	AdminStateUp  *bool  `q:"admin_state_up"`
-	Status        string `q:"status"`
-	Limit         int    `q:"limit"`
-	Marker        string `q:"marker"`
-	SortKey       string `q:"sort_key"`
-	SortDir       string `q:"sort_dir"`
+	HealthcheckId string `q:"healthcheck_id"`
 }
 
 // ToHealthListQuery formats a ListOpts into a query string.
