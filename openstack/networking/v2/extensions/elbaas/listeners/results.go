@@ -4,6 +4,7 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 	"github.com/gophercloud/gophercloud/pagination"
+	"fmt"
 )
 
 type LoadBalancerID struct {
@@ -86,12 +87,18 @@ type commonResult struct {
 
 // Extract is a function that accepts a result and extracts a router.
 func (r commonResult) Extract() (*Listener, error) {
-	var s struct {
-		Listener *Listener `json:"listener"`
+	fmt.Printf("Extracting Listener...\n")
+	l := new(Listener)
+	err := r.ExtractInto(l)
+	if err != nil {
+		fmt.Printf("Error: %s.\n", err.Error())
+		return nil, err
+	} else {
+		fmt.Printf("Returning extract: %+v.\n", l)
+		return l, nil
 	}
-	err := r.ExtractInto(&s)
-	return s.Listener, err
 }
+
 
 // CreateResult represents the result of a create operation.
 type CreateResult struct {

@@ -5,7 +5,7 @@ package elbaas
 import (
 	"testing"
 	"os"
-    //"fmt"
+    "fmt"
 
 	"github.com/gophercloud/gophercloud/acceptance/clients"
 	//networking "github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2"
@@ -13,6 +13,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/listeners"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs"
 	//"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/monitors"
+    "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/healthcheck"
 )
 
 func TestLoadbalancersList(t *testing.T) {
@@ -86,11 +87,38 @@ func TestLoadbalancersCRUD(t *testing.T) {
 
 	tools.PrintResource(t, newListener)
 	
+    //fmt.Printf("######   HEALTH!!!! \n")
 
-	/*
-	// Pool
+	// Health check 
+    health, err := CreateHealth(t, clientlb, lb, listener)
+	if err != nil {
+		t.Fatalf("Unable to create health: %v", err)
+	}
+    fmt.Printf("######   HEALTH before DeleteHealth !!!! lb=%v+ health=%v+ \n", lb, health)
+    defer DeleteHealth(t, clientlb, lb.ID, health.ID)
 
-	pool, err := CreatePool(t, client, lb)
+	newInterval:= tools.RandomInt(1, 5)
+	updateHealthOpts := healthcheck.UpdateOpts{
+		HealthcheckInterval: newInterval,
+	}
+	_, err = healthcheck.Update(clientlb, health.ID, updateHealthOpts).Extract()
+	if err != nil {
+		t.Fatalf("Unable to update health")
+	}
+
+	if err := WaitForLoadBalancerState(clientlb, lb.ID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
+		t.Fatalf("Timed out waiting for loadbalancer to become active")
+	}
+
+	newHealth, err := healthcheck.Get(clientlb, health.ID).Extract()
+	if err != nil {
+		t.Fatalf("Unable to get health")
+	}
+
+	tools.PrintResource(t, newHealth) 
+
+    /*
+    pool, err := CreatePool(t, client, lb)
 	if err != nil {
 		t.Fatalf("Unable to create pool: %v", err)
 	}

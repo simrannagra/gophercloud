@@ -10,6 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/listeners"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/monitors"
+    "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/healthcheck"
 )
 
 const loadbalancerActiveTimeoutSeconds = 300
@@ -24,7 +25,7 @@ func CreateListener(t *testing.T, client *gophercloud.ServiceClient, lb *loadbal
 
 	t.Logf("Attempting to create listener %s on port %d", listenerName, listenerPort)
 
-	fmt.Printf("*******    before  listeners.CreateOpts  \n")
+	// fmt.Printf("*******    before  listeners.CreateOpts  \n")
 
     createOpts := listeners.CreateOpts{
 		Name:           listenerName,
@@ -35,9 +36,10 @@ func CreateListener(t *testing.T, client *gophercloud.ServiceClient, lb *loadbal
 		BackendProtocolPort: listenerPort,
 		Algorithm:		 "roundrobin",
 	}
-    fmt.Printf("*******    after  listeners.CreateOpts %v+ \n", createOpts)
+    // fmt.Printf("*******    after  listeners.CreateOpts %v+ \n", createOpts)
 
 	listener, err := listeners.Create(client, createOpts).Extract()
+	fmt.Printf("Extracted listener: %+v.\n", listener)
 	if err != nil {
 
         t.Logf("Attempting to create listener %s on port %d failed err=%v", listenerName, listenerPort, err)
@@ -188,6 +190,42 @@ func CreatePool(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalance
 */
 }
 
+// CreateMonitor will create a monitor with a random name for a specific pool.
+// An error will be returned if the monitor could not be created.
+func CreateHealth(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalancer_elbs.LoadBalancer, listener *listeners.Listener) (*healthcheck.Health, error) {
+	healthName := tools.RandomString("TESTACCT-", 8)
+
+	t.Logf("Attempting to create health %s", healthName)
+
+    fmt.Printf("######    before  health.CreateOpts listener.ID=%v+  \n", listener.ID)
+
+	createOpts := healthcheck.CreateOpts{
+        HealthcheckConnectPort:  80,
+        HealthcheckInterval: 5,
+        HealthcheckProtocol: "HTTP",
+        HealthcheckTimeout: 10,
+        HealthcheckUri: "/",
+        HealthyThreshold: 3,
+        ListenerID: listener.ID,
+        UnhealthyThreshold: 3,
+	}
+    
+    fmt.Printf("#######    after  health.CreateOpts %v+ \n", createOpts)
+
+	health, err := healthcheck.Create(client, createOpts).Extract()
+	if err != nil {
+		return health, err
+	}
+
+	t.Logf("Successfully created health: %s", healthName)
+
+	if err := WaitForLoadBalancerState(client, lb.ID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
+		return health, fmt.Errorf("Timed out waiting for loadbalancer to become active")
+	}
+
+	return health, nil
+}
+
 // DeleteListener will delete a specified listener. A fatal error will occur if
 // the listener could not be deleted. This works best when used as a deferred
 // function.
@@ -259,6 +297,23 @@ func DeleteMonitor(t *testing.T, client *gophercloud.ServiceClient, lbID, monito
 	}
 
 	t.Logf("Successfully deleted monitor %s", monitorID)
+}
+
+// DeleteHealth will delete a specified monitor. A fatal error will occur if
+// the monitor could not be deleted. This works best when used as a deferred
+// function.
+func DeleteHealth(t *testing.T, client *gophercloud.ServiceClient, lbID, healthID string) {
+	t.Logf("Attempting to delete health %s", healthID)
+
+	if err := healthcheck.Delete(client, healthID).ExtractErr(); err != nil {
+		t.Fatalf("Unable to delete health: %v", err)
+	}
+
+	if err := WaitForLoadBalancerState(client, lbID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
+		t.Fatalf("Timed out waiting for loadbalancer to become active")
+	}
+
+	t.Logf("Successfully deleted health %s", healthID)
 }
 
 func WaitForJobSuccess(client *gophercloud.ServiceClient, uri string, secs int) error {
