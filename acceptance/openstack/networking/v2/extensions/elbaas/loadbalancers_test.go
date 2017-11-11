@@ -127,5 +127,11 @@ func TestLoadbalancersCRUD(t *testing.T) {
 	if err := WaitForLoadBalancerState(clientlb, lb.ID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
 		t.Fatalf("Timed out waiting for loadbalancer to become active")
 	}
+    newHealth, err := healthcheck.Get(clientlb, health.ID).Extract()
+	if err != nil {
+		t.Fatalf("Unable to get health")
+	}
+
+	tools.PrintResource(t, newHealth) 
 
 }
