@@ -115,8 +115,32 @@ func TestLoadbalancersCRUD(t *testing.T) {
 
 	tools.PrintResource(t, newHealth)
 
+	// Create server for backend member
+	client, err := clients.NewComputeV2Client()
+	if err != nil {
+		t.Fatalf("Unable to create a compute client: %v", err)
+	}
+
+	choices, err := clients.AcceptanceTestChoicesFromEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	server, err := CreateServer(t, client)
+	if err != nil {
+		t.Fatalf("Unable to create server: %v", err)
+	}
+
+	defer DeleteServer(t, client, server)
+	newServer, err := servers.Get(client, server.ID).Extract()
+	if err != nil {
+		t.Errorf("Unable to retrieve server: %v", err)
+	}
+	tools.PrintResource(t, newServer)
+
+
 	// Backend Member
-	backend, err, bId:= CreateBackend(t, clientlb, lb, listener)
+	backend, err := CreateBackend(t, clientlb, lb, listener, server_id)
 	if err != nil {
 		t.Fatalf("Unable to create backend: %v", err)
 	}

@@ -149,16 +149,16 @@ func CreateHealth(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalan
 // CreateBackend will create a listener backend for a given load balancer on a random
 // port with a random name. An error will be returned if the listener could not
 // be created.
-func CreateBackend(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalancer_elbs.LoadBalancer, listener *listeners.Listener) (*backendmember.Backend, error, string) {
-	BServerId := tools.RandomString("TESTACCT-", 8)
+func CreateBackend(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalancer_elbs.LoadBalancer, listener *listeners.Listener, server_id string) (*backendmember.Backend, error) {
+	//BServerId := tools.RandomString("TESTACCT-", 8)
 	endAddress := fmt.Sprintf("192.168.2.%d", tools.RandomInt(1, 100))
-	t.Logf("Attempting to create ServerId %s ", BServerId)
+	//t.Logf("Attempting to create ServerId %s ", BServerId)
 
 	// fmt.Printf("*******    before  listeners.CreateOpts  \n")
 
 	createOpts := backendmember.CreateOpts{
 		ListenerId:           listener.ID,
-		ServerId: BServerId,
+		ServerId: server_id,
 		Address:   endAddress,
 	}
 	fmt.Printf("*******    after  backendmember.CreateOpts %v+ \n", createOpts)
@@ -167,17 +167,17 @@ func CreateBackend(t *testing.T, client *gophercloud.ServiceClient, lb *loadbala
 	fmt.Printf("Extracted backend: %+v.\n", backend)
 	if err != nil {
 
-		t.Logf("Attempting to create backend %s failed err=%v", BServerId, err)
-		return backend, err, BServerId
+		t.Logf("Attempting to create backend %s failed err=%v", server_id, err)
+		return backend, err
 	}
 
-	t.Logf("Successfully created backend %s", BServerId)
+	t.Logf("Successfully created backend %s", backend.Uri)
 
 	if err := WaitForLoadBalancerState(client, lb.ID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
-		return backend, fmt.Errorf("Timed out waiting for loadbalancer to become active"), BServerId
+		return backend, fmt.Errorf("Timed out waiting for loadbalancer to become active")
 	}
 
-	return backend, nil, BServerId
+	return backend, nil
 }
 
 // DeleteListener will delete a specified listener. A fatal error will occur if
