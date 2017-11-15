@@ -168,7 +168,7 @@ type UpdateOpts struct {
 
 // ToLoadBalancerUpdateMap casts a UpdateOpts struct to a map.
 func (opts UpdateOpts) ToLoadBalancerUpdateMap() (map[string]interface{}, error) {
-	return gophercloud.BuildRequestBody(opts, "loadbalancer")
+	return gophercloud.BuildRequestBody(opts, "")
 }
 
 // Update is an operation which modifies the attributes of the specified LoadBalancer.

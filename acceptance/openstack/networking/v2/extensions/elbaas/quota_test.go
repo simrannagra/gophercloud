@@ -10,7 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/listeners"
 )
 
-func TestListenersList(t *testing.T) {
+func TestQuotaList(t *testing.T) {
     client, err := clients.NewOtcV1Client("elb")
 	if err != nil {
 		t.Fatalf("Unable to create a network client: %v", err)

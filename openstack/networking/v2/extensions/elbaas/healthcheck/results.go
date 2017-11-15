@@ -1,15 +1,13 @@
-package monitors
+package healthcheck
 
 import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/pagination"
+    "fmt"
 )
 
-type PoolID struct {
-	ID string `json:"id"`
-}
 
-// Monitor represents a load balancer health monitor. A health monitor is used
+// Health represents a load balancer health check. A health monitor is used
 // to determine whether or not back-end members of the VIP's pool are usable
 // for processing a request. A pool can have several health monitors associated
 // with it. There are different types of health monitors supported:
@@ -24,65 +22,56 @@ type PoolID struct {
 // unhealthy, then the member status is changed to INACTIVE and the member
 // won't participate in its pool's load balancing. In other words, ALL monitors
 // must declare the member to be healthy for it to stay ACTIVE.
-type Monitor struct {
-	// The unique ID for the Monitor.
+type Health struct {
+    // Thealthcheck_interval
+    HealthcheckInterval int `json:"healthcheck_interval"`
+
+    // listener_id
+    ListenerId string `json:"listener_id"`
+
+    // The unique ID for the health.
 	ID string `json:"id"`
 
-	// The Name of the Monitor.
-	Name string `json:"name"`
+	// The healthcheck_ protocol
+	HealthcheckProtocol string `json:"healthcheck_ protocol"`
 
-	// Only an administrative user can specify a tenant ID
-	// other than its own.
-	TenantID string `json:"tenant_id"`
+	// unhealthy_threshold
+	UnhealthyThreshold int `json:"unhealthy_threshold"`
 
-	// The type of probe sent by the load balancer to verify the member state,
-	// which is PING, TCP, HTTP, or HTTPS.
-	Type string `json:"type"`
+	// update_time
+	UpdateTime string `json:"update_time"`
 
-	// The time, in seconds, between sending probes to members.
-	Delay int `json:"delay"`
+	// create_time
+	CreateTime string `json:"create_time"`
 
-	// The maximum number of seconds for a monitor to wait for a connection to be
-	// established before it times out. This value must be less than the delay value.
-	Timeout int `json:"timeout"`
+	// healthcheck_connect_port
+	HealthcheckConnectPort int `json:"healthcheck_connect_port"`
 
-	// Number of allowed connection failures before changing the status of the
-	// member to INACTIVE. A valid value is from 1 to 10.
-	MaxRetries int `json:"max_retries"`
+	// healthcheck_timeout
+	HealthcheckTimeout int `json:"healthcheck_timeout"`
 
-	// The HTTP method that the monitor uses for requests.
-	HTTPMethod string `json:"http_method"`
+	// healthcheck_uri
+	HealthcheckUri string `json:"healthcheck_uri" `
 
-	// The HTTP path of the request sent by the monitor to test the health of a
-	// member. Must be a string beginning with a forward slash (/).
-	URLPath string `json:"url_path" `
-
-	// Expected HTTP codes for a passing HTTP(S) monitor.
-	ExpectedCodes string `json:"expected_codes"`
+	// healthy_threshold
+	HealthyThreshold int `json:"healthy_threshold"`
 
 	// The administrative state of the health monitor, which is up (true) or down (false).
-	AdminStateUp bool `json:"admin_state_up"`
-
-	// The status of the health monitor. Indicates whether the health monitor is
-	// operational.
-	Status string `json:"status"`
-
-	// List of pools that are associated with the health monitor.
-	Pools []PoolID `json:"pools"`
+	//AdminStateUp bool `json:"admin_state_up"`
 }
 
 // MonitorPage is the page returned by a pager when traversing over a
 // collection of health monitors.
-type MonitorPage struct {
+type HealthPage struct {
 	pagination.LinkedPageBase
 }
 
 // NextPageURL is invoked when a paginated collection of monitors has reached
 // the end of a page and the pager seeks to traverse over a new one. In order
 // to do this, it needs to construct the next page's URL.
-func (r MonitorPage) NextPageURL() (string, error) {
+func (r HealthPage) NextPageURL() (string, error) {
 	var s struct {
-		Links []gophercloud.Link `json:"healthmonitors_links"`
+		Links []gophercloud.Link `json:"healthcheck_links"`
 	}
 
 	err := r.ExtractInto(&s)
@@ -94,20 +83,20 @@ func (r MonitorPage) NextPageURL() (string, error) {
 }
 
 // IsEmpty checks whether a MonitorPage struct is empty.
-func (r MonitorPage) IsEmpty() (bool, error) {
-	is, err := ExtractMonitors(r)
+func (r HealthPage) IsEmpty() (bool, error) {
+	is, err := ExtractHealth(r)
 	return len(is) == 0, err
 }
 
 // ExtractMonitors accepts a Page struct, specifically a MonitorPage struct,
 // and extracts the elements into a slice of Monitor structs. In other words,
 // a generic collection is mapped into a relevant slice.
-func ExtractMonitors(r pagination.Page) ([]Monitor, error) {
+func ExtractHealth(r pagination.Page) ([]Health, error) {
 	var s struct {
-		Monitors []Monitor `json:"healthmonitors"`
+		Healths []Health `json:"healthcheck"`
 	}
-	err := (r.(MonitorPage)).ExtractInto(&s)
-	return s.Monitors, err
+	err := (r.(HealthPage)).ExtractInto(&s)
+	return s.Healths, err
 }
 
 type commonResult struct {
@@ -115,13 +104,20 @@ type commonResult struct {
 }
 
 // Extract is a function that accepts a result and extracts a monitor.
-func (r commonResult) Extract() (*Monitor, error) {
-	var s struct {
-		Monitor *Monitor `json:"healthmonitor"`
+func (r commonResult) Extract() (*Health, error) {
+	fmt.Printf("Extracting Health...\n")
+	l := new(Health)
+	err := r.ExtractInto(l)
+	if err != nil {
+		fmt.Printf("Error: %s.\n", err.Error())
+		return nil, err
+	} else {
+		fmt.Printf("Returning extract: %+v.\n", l)
+		return l, nil
 	}
-	err := r.ExtractInto(&s)
-	return s.Monitor, err
 }
+
+
 
 // CreateResult represents the result of a create operation.
 type CreateResult struct {

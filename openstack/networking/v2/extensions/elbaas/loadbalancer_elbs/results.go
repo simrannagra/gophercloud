@@ -110,7 +110,6 @@ func (r commonResult) ExtractJobResponse() (*JobResponse, error) {
 }
 
 func (r commonResult) ExtractJobStatus() (*JobStatus, error) {
-	fmt.Printf("body=%s.\n", r.Body)
 	job := new(JobStatus)
 	err := r.ExtractInto(job)
 	return job, err

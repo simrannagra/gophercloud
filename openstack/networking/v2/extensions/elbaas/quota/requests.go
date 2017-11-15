@@ -1,4 +1,4 @@
-package listeners
+package quota
 
 import (
 	"github.com/gophercloud/gophercloud"

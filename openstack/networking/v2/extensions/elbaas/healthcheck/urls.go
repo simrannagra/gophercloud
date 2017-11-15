@@ -1,10 +1,10 @@
-package monitors
+package healthcheck
 
 import "github.com/gophercloud/gophercloud"
 
 const (
-	rootPath     = "lbaas"
-	resourcePath = "healthmonitors"
+	rootPath     = "elbaas"
+	resourcePath = "healthcheck"
 )
 
 func rootURL(c *gophercloud.ServiceClient) string {
