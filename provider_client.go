@@ -10,6 +10,7 @@ import (
 	"strings"
 	//"reflect"
 	"fmt"
+	"reflect"
 )
 
 // DefaultUserAgent is the default User-Agent string set in the request header.
@@ -118,7 +119,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 	//fmt.Printf("Request method: %s, url: %s, options=%+v.\n", method, url, options)
 	// Derive the content body by either encoding an arbitrary object as JSON, or by taking a provided
 	// io.ReadSeeker as-is. Default the content-type to application/json.
-	fmt.Printf("Request: %+v.\n", options)
+	fmt.Printf("Request: %s, %+v.\n", url, options)
 	if options.JSONBody != nil {
 		if options.RawBody != nil {
 			panic("Please provide only one of JSONBody or RawBody to gophercloud.Request().")
@@ -139,6 +140,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 	}
 
 	// Construct the http.Request.
+	fmt.Printf("Request NewRequest...\n")
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
@@ -172,6 +174,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 	req.Close = true
 
 	// Issue the request.
+	fmt.Printf("Request Do...\n")
 	resp, err := client.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -291,11 +294,11 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 	if options.JSONResponse != nil {
 		defer resp.Body.Close()
 		if err := json.NewDecoder(resp.Body).Decode(options.JSONResponse); err != nil {
-			//fmt.Printf("JSON error: %+v, code=%d, body=%s.\n", resp, resp.StatusCode, body)
+			fmt.Printf("JSON error: %+v, code=%d, body=%s.\n", resp, resp.StatusCode, body)
 			return nil, err
 		}
-		//rv := reflect.ValueOf(options.JSONResponse)
-		//fmt.Printf("JSON OK: JSONResponse=%+v.\n", reflect.Indirect(rv))
+		rv := reflect.ValueOf(options.JSONResponse)
+		fmt.Printf("JSON OK: JSONResponse=%+v.\n", reflect.Indirect(rv))
 	}
 
 	//body2, _ := ioutil.ReadAll(resp.Body)
