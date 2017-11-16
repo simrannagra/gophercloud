@@ -161,6 +161,8 @@ type UpdateOpts struct {
 	Name string `json:"name,omitempty"`
 	// Optional. Human-readable description for the Loadbalancer.
 	Description string `json:"description,omitempty"`
+	// Optional. Human-readable description for the Loadbalancer.
+	Bandwidth int `json:"bandwidth,omitempty"`
 	// Optional. The administrative state of the Loadbalancer. A valid value is true (UP)
 	// or false (DOWN).
 	AdminStateUp *bool `json:"admin_state_up,omitempty"`

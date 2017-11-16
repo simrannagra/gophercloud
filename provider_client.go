@@ -119,7 +119,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 	//fmt.Printf("Request method: %s, url: %s, options=%+v.\n", method, url, options)
 	// Derive the content body by either encoding an arbitrary object as JSON, or by taking a provided
 	// io.ReadSeeker as-is. Default the content-type to application/json.
-	fmt.Printf("Request: %s, %+v.\n", url, options)
+	fmt.Printf("Request: %s, %s, %+v.\n", method, url, options)
 	if options.JSONBody != nil {
 		if options.RawBody != nil {
 			panic("Please provide only one of JSONBody or RawBody to gophercloud.Request().")
@@ -298,7 +298,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 			return nil, err
 		}
 		rv := reflect.ValueOf(options.JSONResponse)
-		fmt.Printf("JSON OK: JSONResponse=%+v.\n", reflect.Indirect(rv))
+		fmt.Printf("JSON OK: JSONResponse=%+v, body=%s.\n", reflect.Indirect(rv), body)
 	}
 
 	//body2, _ := ioutil.ReadAll(resp.Body)
