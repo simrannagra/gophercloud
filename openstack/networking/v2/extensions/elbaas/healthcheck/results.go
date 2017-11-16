@@ -2,7 +2,7 @@ package healthcheck
 
 import (
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/pagination"
+	//"github.com/gophercloud/gophercloud/pagination"
     "fmt"
 )
 
@@ -58,45 +58,6 @@ type Health struct {
 
 	// The administrative state of the health monitor, which is up (true) or down (false).
 	//AdminStateUp bool `json:"admin_state_up"`
-}
-
-// MonitorPage is the page returned by a pager when traversing over a
-// collection of health monitors.
-type HealthPage struct {
-	pagination.LinkedPageBase
-}
-
-// NextPageURL is invoked when a paginated collection of monitors has reached
-// the end of a page and the pager seeks to traverse over a new one. In order
-// to do this, it needs to construct the next page's URL.
-func (r HealthPage) NextPageURL() (string, error) {
-	var s struct {
-		Links []gophercloud.Link `json:"healthcheck_links"`
-	}
-
-	err := r.ExtractInto(&s)
-	if err != nil {
-		return "", err
-	}
-
-	return gophercloud.ExtractNextURL(s.Links)
-}
-
-// IsEmpty checks whether a MonitorPage struct is empty.
-func (r HealthPage) IsEmpty() (bool, error) {
-	is, err := ExtractHealth(r)
-	return len(is) == 0, err
-}
-
-// ExtractMonitors accepts a Page struct, specifically a MonitorPage struct,
-// and extracts the elements into a slice of Monitor structs. In other words,
-// a generic collection is mapped into a relevant slice.
-func ExtractHealth(r pagination.Page) ([]Health, error) {
-	var s struct {
-		Healths []Health `json:"healthcheck"`
-	}
-	err := (r.(HealthPage)).ExtractInto(&s)
-	return s.Healths, err
 }
 
 type commonResult struct {

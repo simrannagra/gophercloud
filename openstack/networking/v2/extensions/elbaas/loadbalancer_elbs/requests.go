@@ -191,8 +191,3 @@ func Delete(c *gophercloud.ServiceClient, id string) (r DeleteResult) {
 	})
 	return
 }
-
-func GetStatuses(c *gophercloud.ServiceClient, id string) (r GetStatusesResult) {
-	_, r.Err = c.Get(statusRootURL(c, id), &r.Body, nil)
-	return
-}

@@ -4,52 +4,8 @@ import (
 	"fmt"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/pagination"
+	//"github.com/gophercloud/gophercloud/pagination"
 )
-
-// ListOptsBuilder allows extensions to add additional parameters to the
-// List request.
-type ListOptsBuilder interface {
-	ToHealthistQuery() (string, error)
-}
-
-// ListOpts allows the filtering and sorting of paginated collections through
-// the API. Filtering is achieved by passing in struct field values that map to
-// the Monitor attributes you want to see returned. SortKey allows you to
-// sort by a particular Monitor attribute. SortDir sets the direction, and is
-// either `asc' or `desc'. Marker and Limit are used for pagination.
-type ListOpts struct {
-	HealthcheckId string `q:"healthcheck_id"`
-}
-
-// ToHealthListQuery formats a ListOpts into a query string.
-func (opts ListOpts) ToHealthListQuery() (string, error) {
-	q, err := gophercloud.BuildQueryString(opts)
-	if err != nil {
-		return "", err
-	}
-	return q.String(), nil
-}
-
-// List returns a Pager which allows you to iterate over a collection of
-// health monitors. It accepts a ListOpts struct, which allows you to filter and sort
-// the returned collection for greater efficiency.
-//
-// Default policy settings return only those health monitors that are owned by the
-// tenant who submits the request, unless an admin user submits the request.
-func List(c *gophercloud.ServiceClient, opts ListOptsBuilder) pagination.Pager {
-	url := rootURL(c)
-	if opts != nil {
-		query, err := opts.ToHealthistQuery()
-		if err != nil {
-			return pagination.Pager{Err: err}
-		}
-		url += query
-	}
-	return pagination.NewPager(c, url, func(r pagination.PageResult) pagination.Page {
-		return HealthPage{pagination.LinkedPageBase{PageResult: r}}
-	})
-}
 
 // Constants that represent approved monitoring types.
 const (

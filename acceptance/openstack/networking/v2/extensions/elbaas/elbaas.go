@@ -239,7 +239,7 @@ func DeleteHealth(t *testing.T, client *gophercloud.ServiceClient, lbID, healthI
 // DeleteBackend will delete a specified listener. A fatal error will occur if
 // the listener could not be deleted. This works best when used as a deferred
 // function.
-func DeleteBackend(t *testing.T, client *gophercloud.ServiceClient, lbID, listenerID, memId string) {
+func DeleteBackend(t *testing.T, client *gophercloud.ServiceClient, lbID, listenerID string) {
 	t.Logf("Attempting to delete backend member %s", listenerID)
 
 	if err := backendmember.Delete(client, listenerID).ExtractErr(); err != nil {

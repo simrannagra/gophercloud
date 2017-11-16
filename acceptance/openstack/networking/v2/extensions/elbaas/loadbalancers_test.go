@@ -12,8 +12,10 @@ import (
 	"github.com/gophercloud/gophercloud/acceptance/tools"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/listeners"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs"
-	//"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/backendmember"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/backendmember"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/healthcheck"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	compute "github.com/gophercloud/gophercloud/acceptance/openstack/compute/v2"
 )
 
 func TestLoadbalancersList(t *testing.T) {
@@ -121,41 +123,34 @@ func TestLoadbalancersCRUD(t *testing.T) {
 		t.Fatalf("Unable to create a compute client: %v", err)
 	}
 
-	choices, err := clients.AcceptanceTestChoicesFromEnv()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	server, err := CreateServer(t, client)
+	server, err := compute.CreateServer(t, client)
 	if err != nil {
 		t.Fatalf("Unable to create server: %v", err)
 	}
 
-	defer DeleteServer(t, client, server)
+	defer compute.DeleteServer(t, client, server)
 	newServer, err := servers.Get(client, server.ID).Extract()
 	if err != nil {
 		t.Errorf("Unable to retrieve server: %v", err)
 	}
 	tools.PrintResource(t, newServer)
 
-
 	// Backend Member
-	backend, err := CreateBackend(t, clientlb, lb, listener, server_id)
+	backend, err := CreateBackend(t, clientlb, lb, listener, server.ID)
 	if err != nil {
 		t.Fatalf("Unable to create backend: %v", err)
 	}
 	fmt.Printf("######   BackEnd before DeleteBackend !!!! lb=%v+ backend=%v+ \n", lb, backend)
-	defer DeleteBackend(t, clientlb, lb.ID, listener.ID, bId)
-
+	defer DeleteBackend(t, clientlb, lb.ID, listener.ID)
 
 	if err := WaitForLoadBalancerState(clientlb, lb.ID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
 		t.Fatalf("Timed out waiting for loadbalancer to become active")
 	}
-	newHealth, err = healthcheck.Get(clientlb, health.ID).Extract()
+	newBackend, err := backendmember.Get(clientlb, health.ID).Extract()
 	if err != nil {
 		t.Fatalf("Unable to get health")
 	}
 
-	tools.PrintResource(t, newHealth)
+	tools.PrintResource(t, newBackend)
 
 }

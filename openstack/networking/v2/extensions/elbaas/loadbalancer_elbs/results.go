@@ -58,10 +58,6 @@ type JobStatus struct {
 	FailReason string `json:"fail_reason"`
 }
 
-type StatusTree struct {
-	Loadbalancer *LoadBalancer `json:"loadbalancer"`
-}
-
 // LoadBalancerPage is the page returned by a pager when traversing over a
 // collection of routers.
 type LoadBalancerPage struct {
@@ -71,16 +67,9 @@ type LoadBalancerPage struct {
 // NextPageURL is invoked when a paginated collection of routers has reached
 // the end of a page and the pager seeks to traverse over a new one. In order
 // to do this, it needs to construct the next page's URL.
-func (r LoadBalancerPage) NextPageURL() (string, error) {
-	var s struct {
-		Links []gophercloud.Link `json:"loadbalancers_links"`
-	}
-	err := r.ExtractInto(&s)
-	if err != nil {
-		return "", err
-	}
-	return gophercloud.ExtractNextURL(s.Links)
-}
+/* func (r LoadBalancerPage) NextPageURL() (string, error) {
+	return "", nil
+} */
 
 // IsEmpty checks whether a LoadBalancerPage struct is empty.
 func (p LoadBalancerPage) IsEmpty() (bool, error) {
@@ -115,7 +104,7 @@ func (r commonResult) ExtractJobStatus() (*JobStatus, error) {
 	return job, err
 }
 
-// Extract is a function that accepts a result and extracts a router.
+// Extract is a function that accepts a result and extracts a loadbalancer.
 func (r commonResult) Extract() (*LoadBalancer, error) {
 	fmt.Printf("Extracting...\n")
 	lb := new(LoadBalancer)
@@ -131,15 +120,6 @@ func (r commonResult) Extract() (*LoadBalancer, error) {
 
 type GetStatusesResult struct {
 	gophercloud.Result
-}
-
-// Extract is a function that accepts a result and extracts a Loadbalancer.
-func (r GetStatusesResult) Extract() (*StatusTree, error) {
-	var s struct {
-		Statuses *StatusTree `json:"statuses"`
-	}
-	err := r.ExtractInto(&s)
-	return s.Statuses, err
 }
 
 // CreateResult represents the result of a create operation.
