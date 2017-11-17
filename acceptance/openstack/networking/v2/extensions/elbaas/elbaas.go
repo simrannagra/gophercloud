@@ -83,11 +83,11 @@ func CreateLoadBalancer(t *testing.T, client *gophercloud.ServiceClient, subnetI
 	t.Logf("Successfully created loadbalancer %s on subnet %s", lbName, subnetID)
 	t.Logf("Waiting for loadbalancer %s to become active", lbName)
 
-	if err := WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
+	if err := gophercloud.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
 		return nil, err
 	}
 
-	mlb, err := GetJobEntity(client, job.URI,"elb")
+	mlb, err := gophercloud.GetJobEntity(client, job.URI,"elb")
 	fmt.Printf("mlb=%+v.\n", mlb)
 	t.Logf("LoadBalancer %s is active", lbName)
 
@@ -113,10 +113,6 @@ func CreateLoadBalancer(t *testing.T, client *gophercloud.ServiceClient, subnetI
 // CreateHealth will create a monitor with a random name for a specific pool.
 // An error will be returned if the monitor could not be created.
 func CreateHealth(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalancer_elbs.LoadBalancer, listener *listeners.Listener) (*healthcheck.Health, error) {
-	healthName := tools.RandomString("TESTACCT-", 8)
-
-	t.Logf("Attempting to create health %s", healthName)
-
 	fmt.Printf("######    before  health.CreateOpts listener.ID=%v+  \n", listener.ID)
 
 	createOpts := healthcheck.CreateOpts{
@@ -132,18 +128,24 @@ func CreateHealth(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalan
 
 	fmt.Printf("#######    after  health.CreateOpts %v+ \n", createOpts)
 
-	health, err := healthcheck.Create(client, createOpts).Extract()
+	job, err := healthcheck.Create(client, createOpts).ExtractJobResponse()
 	if err != nil {
-		return health, err
+		return nil, err
 	}
 
-	t.Logf("Successfully created health: %s", healthName)
+	fmt.Printf("job=%+v.\n", job)
 
-	if err := WaitForLoadBalancerState(client, lb.ID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
-		return health, fmt.Errorf("Timed out waiting for loadbalancer to become active")
+	//t.Logf("Successfully created healthcheck %s on loadbalancer %s", lbName, lb.ID)
+	//t.Logf("Waiting for healthcheck %s to become active", lbName)
+
+	if err := gophercloud.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
+		return nil, err
 	}
 
-	return health, nil
+	//t.Logf("Successfully created health: %s", healthName)
+
+	//return health, nil
+	return nil, nil
 }
 
 // CreateBackend will create a listener backend for a given load balancer on a random
@@ -212,7 +214,7 @@ func DeleteLoadBalancer(t *testing.T, client *gophercloud.ServiceClient, lbID st
 
 	t.Logf("Waiting for loadbalancer %s to delete", lbID)
 
-	if err := WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
+	if err := gophercloud.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
 		t.Fatalf("Loadbalancer did not delete in time.")
 	}
 
@@ -251,46 +253,6 @@ func DeleteBackend(t *testing.T, client *gophercloud.ServiceClient, lbID, listen
 	}
 
 	t.Logf("Successfully deleted listener %s", listenerID)
-}
-
-func WaitForJobSuccess(client *gophercloud.ServiceClient, uri string, secs int) error {
-	return gophercloud.WaitFor(secs, func() (bool, error) {
-		job := new(loadbalancer_elbs.JobStatus)
-		_, err := client.Get("https://elb.eu-de.otc.t-systems.com" + uri, &job, nil)
-		if err != nil {
-			return false, err
-		}
-		fmt.Printf("JobStatus: %+v.\n", job)
-
-		if job.Status == "SUCCESS" {
-			return true, nil
-		}
-		if job.Status == "FAIL" {
-			err = fmt.Errorf("Job failed with code %s: %s.\n", job.ErrorCode, job.FailReason)
-			return false, err
-		}
-
-		return false, nil
-	})
-}
-
-func GetJobEntity(client *gophercloud.ServiceClient, uri string, label string) (map[string]interface{}, error) {
-	job := new(loadbalancer_elbs.JobStatus)
-	_, err := client.Get("https://elb.eu-de.otc.t-systems.com" + uri, &job, nil)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Printf("JobStatus: %+v.\n", job)
-
-	if job.Status == "SUCCESS" {
-		if e := job.Entities[label]; e != nil {
-			if m, ok := e.(map[string]interface{}); ok {
-				return m, nil
-			}
-		}
-	}
-
-	return nil, nil
 }
 
 // WaitForLoadBalancerState will wait until a loadbalancer reaches a given state.

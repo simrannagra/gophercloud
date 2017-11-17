@@ -40,22 +40,6 @@ type LoadBalancer struct {
     TenantID string `json:"tenantId"`
 	// The unique ID for the LoadBalancer.
 	ID string `json:"id"`
-
-
-}
-
-type JobResponse struct {
-	URI string `json:"uri"`
-	JobID string `json:"job_id"`
-}
-
-type JobStatus struct {
-	Status string `json:"status"`
-	Entities map[string]interface{} `json:"entities"`
-	JobID string `json:"job_id"`
-	JobType string `json:"job_type"`
-	ErrorCode string `json:"error_code"`
-	FailReason string `json:"fail_reason"`
 }
 
 // LoadBalancerPage is the page returned by a pager when traversing over a
@@ -90,18 +74,6 @@ func ExtractLoadBalancers(r pagination.Page) ([]LoadBalancer, error) {
 
 type commonResult struct {
 	gophercloud.Result
-}
-
-func (r commonResult) ExtractJobResponse() (*JobResponse, error) {
-	job := new(JobResponse)
-	err := r.ExtractInto(job)
-	return job, err
-}
-
-func (r commonResult) ExtractJobStatus() (*JobStatus, error) {
-	job := new(JobStatus)
-	err := r.ExtractInto(job)
-	return job, err
 }
 
 // Extract is a function that accepts a result and extracts a loadbalancer.
