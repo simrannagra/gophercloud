@@ -3,6 +3,7 @@ package listeners
 import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/pagination"
+	"fmt"
 )
 
 type Protocol string
@@ -173,6 +174,10 @@ func Update(c *gophercloud.ServiceClient, id string, opts UpdateOpts) (r UpdateR
 
 // Delete will permanently delete a particular Listeners based on its unique ID.
 func Delete(c *gophercloud.ServiceClient, id string) (r DeleteResult) {
-	_, r.Err = c.Delete(resourceURL(c, id), nil)
+	url := resourceURL(c, id)
+	fmt.Printf("Delete listener url: %s.\n", url)
+	_, r.Err = c.Delete1(url, &gophercloud.RequestOpts{
+		OkCodes: []int{204},
+	})
 	return
 }

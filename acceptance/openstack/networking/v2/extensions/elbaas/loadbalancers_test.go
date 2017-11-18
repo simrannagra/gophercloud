@@ -14,8 +14,8 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs"
 	//"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/backendmember"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/healthcheck"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	compute "github.com/gophercloud/gophercloud/acceptance/openstack/compute/v2"
+	//"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	//compute "github.com/gophercloud/gophercloud/acceptance/openstack/compute/v2"
 )
 
 func TestLoadbalancersList(t *testing.T) {
@@ -68,7 +68,8 @@ func TestLoadbalancersCRUD(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unable to create listener: %v", err)
 	}
-	defer DeleteListener(t, clientlb, lb.ID, listener.ID)
+	fmt.Printf("Listener created: %+v.\n", listener)
+	defer DeleteListener(t, clientlb, listener.ID)
 
 	updateListenerOpts := listeners.UpdateOpts{
 		Description: "Some listener description",
@@ -109,26 +110,7 @@ func TestLoadbalancersCRUD(t *testing.T) {
 
 	tools.PrintResource(t, newHealth)
 
-	// Create server for backend member
-	client, err := clients.NewComputeV2Client()
-	if err != nil {
-		t.Fatalf("Unable to create a compute client: %v", err)
-	}
-
-	server, err := compute.CreateServer(t, client)
-	if err != nil {
-		t.Fatalf("Unable to create server: %v", err)
-	}
-
-	defer compute.DeleteServer(t, client, server)
-	newServer, err := servers.Get(client, server.ID).Extract()
-	if err != nil {
-		t.Errorf("Unable to retrieve server: %v", err)
-	}
-	tools.PrintResource(t, newServer)
-
-	// Backend Member
-	backend, err := AddBackend(t, clientlb, lb, listener, server.ID)
+	backend, err := AddBackend(t, clientlb, lb, listener, os.Getenv("OS_SERVER_ID"), os.Getenv("OS_SERVER_ADDRESS"))
 	if err != nil {
 		t.Fatalf("Unable to create backend: %v", err)
 	}

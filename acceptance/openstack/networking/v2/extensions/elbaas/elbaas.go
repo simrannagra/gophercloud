@@ -131,12 +131,10 @@ func CreateHealth(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalan
 // CreateBackend will create a listener backend for a given load balancer on a random
 // port with a random name. An error will be returned if the listener could not
 // be created.
-func AddBackend(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalancer_elbs.LoadBalancer, listener *listeners.Listener, server_id string) (*backendmember.Backend, error) {
-	endAddress := fmt.Sprintf("192.168.2.%d", tools.RandomInt(1, 100))
-
+func AddBackend(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalancer_elbs.LoadBalancer, listener *listeners.Listener, server_id string, address string) (*backendmember.Backend, error) {
 	addOpts := backendmember.AddOpts{
 		ServerId: server_id,
-		Address:   endAddress,
+		Address:   address,
 	}
 	fmt.Printf("*******    after  backendmember.AddOpts %v+ \n", addOpts)
 
@@ -158,15 +156,15 @@ func AddBackend(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalance
 // DeleteListener will delete a specified listener. A fatal error will occur if
 // the listener could not be deleted. This works best when used as a deferred
 // function.
-func DeleteListener(t *testing.T, client *gophercloud.ServiceClient, lbID, listenerID string) {
-	t.Logf("Attempting to delete listener %s", listenerID)
+func DeleteListener(t *testing.T, client *gophercloud.ServiceClient, id string) {
+	t.Logf("Attempting to delete listener %s", id)
 
-	err := listeners.Delete(client, listenerID).ExtractErr()
+	err := listeners.Delete(client, id).ExtractErr()
 	if err != nil {
 		t.Fatalf("Unable to delete listner: %v", err)
 	}
 
-	t.Logf("Successfully deleted listener %s", listenerID)
+	t.Logf("Successfully deleted listener %s", id)
 }
 
 
