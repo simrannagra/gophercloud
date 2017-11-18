@@ -7,10 +7,10 @@ const (
 	resourcePath = "listeners"
 )
 
-func rootURL(c *gophercloud.ServiceClient) string {
-	return c.ServiceURL(rootPath, resourcePath)
+func addURL(c *gophercloud.ServiceClient, listener_id string) string {
+	return c.ServiceURL(rootPath, resourcePath, listener_id, "members")
 }
 
-func resourceURL(c *gophercloud.ServiceClient, id string) string {
-	return c.ServiceURL(rootPath, resourcePath, id)
+func removeURL(c *gophercloud.ServiceClient, listener_id string) string {
+	return c.ServiceURL(rootPath, resourcePath, listener_id, "members", "removeMember")
 }

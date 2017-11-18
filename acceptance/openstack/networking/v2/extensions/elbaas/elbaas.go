@@ -40,18 +40,11 @@ func CreateListener(t *testing.T, client *gophercloud.ServiceClient, lb *loadbal
 	// fmt.Printf("*******    after  listeners.CreateOpts %v+ \n", createOpts)
 
 	listener, err := listeners.Create(client, createOpts).Extract()
-	fmt.Printf("Extracted listener: %+v.\n", listener)
 	if err != nil {
-
-		t.Logf("Attempting to create listener %s on port %d failed err=%v", listenerName, listenerPort, err)
-		return listener, err
+		return nil, err
 	}
 
-	t.Logf("Successfully created listener %s", listenerName)
-
-	if err := WaitForLoadBalancerState(client, lb.ID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
-		return listener, fmt.Errorf("Timed out waiting for loadbalancer to become active")
-	}
+	t.Logf("Successfully created listener %s", listener.ID)
 
 	return listener, nil
 }
@@ -79,8 +72,6 @@ func CreateLoadBalancer(t *testing.T, client *gophercloud.ServiceClient, subnetI
 	}
 
 	fmt.Printf("job=%+v.\n", job)
-
-	t.Logf("Successfully created loadbalancer %s on subnet %s", lbName, subnetID)
 	t.Logf("Waiting for loadbalancer %s to become active", lbName)
 
 	if err := gophercloud.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
@@ -108,8 +99,6 @@ func CreateLoadBalancer(t *testing.T, client *gophercloud.ServiceClient, subnetI
 	return nil, err
 }
 
-
-
 // CreateHealth will create a monitor with a random name for a specific pool.
 // An error will be returned if the monitor could not be created.
 func CreateHealth(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalancer_elbs.LoadBalancer, listener *listeners.Listener) (*healthcheck.Health, error) {
@@ -128,58 +117,42 @@ func CreateHealth(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalan
 
 	fmt.Printf("#######    after  health.CreateOpts %v+ \n", createOpts)
 
-	job, err := healthcheck.Create(client, createOpts).ExtractJobResponse()
+	health, err := healthcheck.Create(client, createOpts).Extract()
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Printf("job=%+v.\n", job)
-
-	//t.Logf("Successfully created healthcheck %s on loadbalancer %s", lbName, lb.ID)
-	//t.Logf("Waiting for healthcheck %s to become active", lbName)
-
-	if err := gophercloud.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
-		return nil, err
-	}
-
-	//t.Logf("Successfully created health: %s", healthName)
+	t.Logf("Successfully created healthcheck %s.", health.ID)
 
 	//return health, nil
-	return nil, nil
+	return health, nil
 }
 
 // CreateBackend will create a listener backend for a given load balancer on a random
 // port with a random name. An error will be returned if the listener could not
 // be created.
-func CreateBackend(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalancer_elbs.LoadBalancer, listener *listeners.Listener, server_id string) (*backendmember.Backend, error) {
-	//BServerId := tools.RandomString("TESTACCT-", 8)
+func AddBackend(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalancer_elbs.LoadBalancer, listener *listeners.Listener, server_id string) (*backendmember.Backend, error) {
 	endAddress := fmt.Sprintf("192.168.2.%d", tools.RandomInt(1, 100))
-	//t.Logf("Attempting to create ServerId %s ", BServerId)
 
-	// fmt.Printf("*******    before  listeners.CreateOpts  \n")
-
-	createOpts := backendmember.CreateOpts{
-		ListenerId:           listener.ID,
+	addOpts := backendmember.AddOpts{
 		ServerId: server_id,
 		Address:   endAddress,
 	}
-	fmt.Printf("*******    after  backendmember.CreateOpts %v+ \n", createOpts)
+	fmt.Printf("*******    after  backendmember.AddOpts %v+ \n", addOpts)
 
-	backend, err := backendmember.Create(client, createOpts).Extract()
-	fmt.Printf("Extracted backend: %+v.\n", backend)
+	job, err := backendmember.Add(client, listener.ID, addOpts).ExtractJobResponse()
 	if err != nil {
-
-		t.Logf("Attempting to create backend %s failed err=%v", server_id, err)
-		return backend, err
+		return nil, err
 	}
 
-	t.Logf("Successfully created backend %s", backend.Uri)
+	fmt.Printf("job=%+v.\n", job)
+	t.Logf("Waiting for backend to become active")
 
-	if err := WaitForLoadBalancerState(client, lb.ID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
-		return backend, fmt.Errorf("Timed out waiting for loadbalancer to become active")
+	if err := gophercloud.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
+		return nil, err
 	}
 
-	return backend, nil
+	return nil, nil
 }
 
 // DeleteListener will delete a specified listener. A fatal error will occur if
@@ -188,12 +161,9 @@ func CreateBackend(t *testing.T, client *gophercloud.ServiceClient, lb *loadbala
 func DeleteListener(t *testing.T, client *gophercloud.ServiceClient, lbID, listenerID string) {
 	t.Logf("Attempting to delete listener %s", listenerID)
 
-	if err := listeners.Delete(client, listenerID).ExtractErr(); err != nil {
-		t.Fatalf("Unable to delete listener: %v", err)
-	}
-
-	if err := WaitForLoadBalancerState(client, lbID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
-		t.Fatalf("Timed out waiting for loadbalancer to become active")
+	err := listeners.Delete(client, listenerID).ExtractErr()
+	if err != nil {
+		t.Fatalf("Unable to delete listner: %v", err)
 	}
 
 	t.Logf("Successfully deleted listener %s", listenerID)
@@ -231,49 +201,25 @@ func DeleteHealth(t *testing.T, client *gophercloud.ServiceClient, lbID, healthI
 		t.Fatalf("Unable to delete health: %v", err)
 	}
 
-	if err := WaitForLoadBalancerState(client, lbID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
-		t.Fatalf("Timed out waiting for loadbalancer to become active")
-	}
-
 	t.Logf("Successfully deleted health %s", healthID)
 }
 
 // DeleteBackend will delete a specified listener. A fatal error will occur if
 // the listener could not be deleted. This works best when used as a deferred
 // function.
-func DeleteBackend(t *testing.T, client *gophercloud.ServiceClient, lbID, listenerID string) {
-	t.Logf("Attempting to delete backend member %s", listenerID)
+func RemoveBackend(t *testing.T, client *gophercloud.ServiceClient, listener_id, id string) {
+	t.Logf("Attempting to delete backend member %s", id)
 
-	if err := backendmember.Delete(client, listenerID).ExtractErr(); err != nil {
-		t.Fatalf("Unable to delete listener: %v", err)
+	job, err := backendmember.Remove(client, listener_id, id).ExtractJobResponse()
+	if err != nil {
+		t.Fatalf("Unable to delete backend: %v", err)
 	}
 
-	if err := WaitForLoadBalancerState(client, lbID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
-		t.Fatalf("Timed out waiting for loadbalancer to become active")
+	t.Logf("Waiting for backend member %s to delete", id)
+
+	if err := gophercloud.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
+		t.Fatalf("backend member did not delete in time.")
 	}
 
-	t.Logf("Successfully deleted listener %s", listenerID)
-}
-
-// WaitForLoadBalancerState will wait until a loadbalancer reaches a given state.
-func WaitForLoadBalancerState(client *gophercloud.ServiceClient, lbID string, status int, secs int) error {
-	return gophercloud.WaitFor(secs, func() (bool, error) {
-		current, err := loadbalancer_elbs.Get(client, lbID).Extract()
-		if err != nil {
-			if httpStatus, ok := err.(gophercloud.ErrDefault404); ok {
-				if httpStatus.Actual == 404 {
-					//if status == "DELETED" {
-					//	return true, nil
-					//}
-				}
-			}
-			return false, err
-		}
-
-		if current.AdminStateUp == status {
-			return true, nil
-		}
-
-		return false, nil
-	})
+	t.Logf("Successfully deleted backend member %s", id)
 }
