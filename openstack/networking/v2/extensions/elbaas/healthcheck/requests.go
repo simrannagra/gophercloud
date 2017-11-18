@@ -30,34 +30,30 @@ type CreateOptsBuilder interface {
 // CreateOpts is the common options struct used in this package's Create
 // operation.
 type CreateOpts struct {
-    // Specifies the ID of the listener to which the health check task belongs.
+    // Required.  Specifies the ID of the listener to which the health check task belongs.
     ListenerID string `json:"listener_id" required:"true"`
     // Optional. Specifies the protocol used for the health check. The value can be HTTP or TCP (case-insensitive).
-	HealthcheckProtocol string `json:"healthcheck_protocol,omitempt"`
+	HealthcheckProtocol string `json:"healthcheck_protocol,omitempty"`
 	// Optional. Specifies the URI for health check. This parameter is valid when healthcheck_ protocol is HTTP.
     // The value is a string of 1 to 80 characters that must start with a slash (/) and can only contain letters, digits, 
     // and special characters, such as -/.%?#&.
-	HealthcheckUri string `json:"healthcheck_uri,omitempt"`
-	// Optional. Specifies the port used for the health check.The value ranges from 1 to 65535.
-	HealthcheckConnectPort int `json:"healthcheck_connect_port,omitempt"`
+	HealthcheckUri string `json:"healthcheck_uri,omitempty"`
+	// Optional. Specifies the port used for the health check.  The value ranges from 1 to 65535.
+	HealthcheckConnectPort int `json:"healthcheck_connect_port,omitempty"`
 	// Optional. MSpecifies the threshold at which the health check result is success, that is, the number of consecutive successful 
     // health checks when the health check result of the backend server changes from fail to success.
     // The value ranges from 1 to 10.
-	HealthyThreshold int `json:"healthy_threshold,omitempt"`
+	HealthyThreshold int `json:"healthy_threshold,omitempty"`
 	// Optional. Specifies the threshold at which the health check result is fail, that is, the number of consecutive 
     // failed health checks when the health check result of the backend server changes from success to fail.
     // The value ranges from 1 to 10.
-	UnhealthyThreshold int `json:"unhealthy_threshold,omitempt"`
-    // Optinal Specifies the maximum timeout duration (s) for the health check.
+	UnhealthyThreshold int `json:"unhealthy_threshold,omitempty"`
+    // Optional. Specifies the maximum timeout duration (s) for the health check.
     // The value ranges from 1 to 50.
 	HealthcheckTimeout int `json:"healthcheck_timeout,omitempty"`
-	// Optional Specifies the maximum interval (s) for health check.
+	// Optional. Specifies the maximum interval (s) for health check.
     // The value ranges from 1 to 5.
 	HealthcheckInterval int `json:"healthcheck_interval,omitempty"`
-	
-	// Optional. The Name of the Monitor.
-	//Name         string `json:"name,omitempty"`
-	//AdminStateUp *bool  `json:"admin_state_up,omitempty"`
 }
 
 // ToHealthCreateMap casts a CreateOpts struct to a map.
@@ -128,21 +124,28 @@ type UpdateOptsBuilder interface {
 // UpdateOpts is the common options struct used in this package's Update
 // operation.
 type UpdateOpts struct {
-	// healthcheck_ protocol
-	HealthcheckProtocol string `json:"healthcheck_ protocol,omitempty"`
-	// healthcheck_uri
+	// Optional. Specifies the protocol used for the health check. The value can be HTTP or TCP (case-insensitive).
+	HealthcheckProtocol string `json:"healthcheck_protocol,omitempty"`
+	// Optional. Specifies the URI for health check. This parameter is valid when healthcheck_ protocol is HTTP.
+	// The value is a string of 1 to 80 characters that must start with a slash (/) and can only contain letters, digits,
+	// and special characters, such as -/.%?#&.
 	HealthcheckUri string `json:"healthcheck_uri,omitempty"`
-	// healthcheck_ protocol
+	// Optional. Specifies the port used for the health check.  The value ranges from 1 to 65535.
 	HealthcheckConnectPort int `json:"healthcheck_connect_port,omitempty"`
-	// healthy_threshold
+	// Optional. MSpecifies the threshold at which the health check result is success, that is, the number of consecutive successful
+	// health checks when the health check result of the backend server changes from fail to success.
+	// The value ranges from 1 to 10.
 	HealthyThreshold int `json:"healthy_threshold,omitempty"`
-	// unhealthy_threshold
+	// Optional. Specifies the threshold at which the health check result is fail, that is, the number of consecutive
+	// failed health checks when the health check result of the backend server changes from success to fail.
+	// The value ranges from 1 to 10.
 	UnhealthyThreshold int `json:"unhealthy_threshold,omitempty"`
-	// healthcheck_timeout
+	// Optional. Specifies the maximum timeout duration (s) for the health check.
+	// The value ranges from 1 to 50.
 	HealthcheckTimeout int `json:"healthcheck_timeout,omitempty"`
-	// healthcheck_interval
+	// Optional. Specifies the maximum interval (s) for health check.
+	// The value ranges from 1 to 5.
 	HealthcheckInterval int `json:"healthcheck_interval,omitempty"`
-	
 }
 
 // ToHealthpdateMap casts a UpdateOpts struct to a map.

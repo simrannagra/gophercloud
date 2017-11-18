@@ -1,7 +1,7 @@
 package elbaas
 
 import (
-	"fmt"
+	//"fmt"
 	// "strings"
 	"testing"
 
@@ -71,7 +71,7 @@ func CreateLoadBalancer(t *testing.T, client *gophercloud.ServiceClient, subnetI
 		return nil, err
 	}
 
-	fmt.Printf("job=%+v.\n", job)
+	//fmt.Printf("job=%+v.\n", job)
 	t.Logf("Waiting for loadbalancer %s to become active", lbName)
 
 	if err := gophercloud.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
@@ -79,19 +79,19 @@ func CreateLoadBalancer(t *testing.T, client *gophercloud.ServiceClient, subnetI
 	}
 
 	mlb, err := gophercloud.GetJobEntity(client, job.URI,"elb")
-	fmt.Printf("mlb=%+v.\n", mlb)
+	//fmt.Printf("mlb=%+v.\n", mlb)
 	t.Logf("LoadBalancer %s is active", lbName)
 
 	if vid, ok := mlb["id"]; ok {
-		fmt.Printf("vid=%s.\n", vid)
+		//fmt.Printf("vid=%s.\n", vid)
 		if id, ok := vid.(string); ok {
-			fmt.Printf("id=%s.\n", id)
+			//fmt.Printf("id=%s.\n", id)
 			lb, err := loadbalancer_elbs.Get(client, id).Extract()
 			if err != nil {
-				fmt.Printf("Error: %s.\n", err.Error())
+				//fmt.Printf("Error: %s.\n", err.Error())
 				return nil, err
 			}
-			fmt.Printf("lb=%+v.\n", lb)
+			//fmt.Printf("lb=%+v.\n", lb)
 			return lb, err
 		}
 	}
@@ -102,7 +102,7 @@ func CreateLoadBalancer(t *testing.T, client *gophercloud.ServiceClient, subnetI
 // CreateHealth will create a monitor with a random name for a specific pool.
 // An error will be returned if the monitor could not be created.
 func CreateHealth(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalancer_elbs.LoadBalancer, listener *listeners.Listener) (*healthcheck.Health, error) {
-	fmt.Printf("######    before  health.CreateOpts listener.ID=%v+  \n", listener.ID)
+	//fmt.Printf("######    before  health.CreateOpts listener.ID=%v+  \n", listener.ID)
 
 	createOpts := healthcheck.CreateOpts{
 		HealthcheckConnectPort:  80,
@@ -115,7 +115,7 @@ func CreateHealth(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalan
 		UnhealthyThreshold: 3,
 	}
 
-	fmt.Printf("#######    after  health.CreateOpts %v+ \n", createOpts)
+	//fmt.Printf("#######    after  health.CreateOpts %v+ \n", createOpts)
 
 	health, err := healthcheck.Create(client, createOpts).Extract()
 	if err != nil {
@@ -136,14 +136,14 @@ func AddBackend(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalance
 		ServerId: server_id,
 		Address:   address,
 	}
-	fmt.Printf("*******    after  backendmember.AddOpts %v+ \n", addOpts)
+	//fmt.Printf("*******    after  backendmember.AddOpts %v+ \n", addOpts)
 
 	job, err := backendmember.Add(client, listener.ID, addOpts).ExtractJobResponse()
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Printf("job=%+v.\n", job)
+	//fmt.Printf("job=%+v.\n", job)
 	t.Logf("Waiting for backend to become active")
 
 	if err := gophercloud.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
@@ -175,7 +175,7 @@ func DeleteLoadBalancer(t *testing.T, client *gophercloud.ServiceClient, lbID st
 	t.Logf("Attempting to delete loadbalancer %s", lbID)
 
 	job, err := loadbalancer_elbs.Delete(client, lbID).ExtractJobResponse()
-	fmt.Printf("delete job: %+v.\n", job)
+	//fmt.Printf("delete job: %+v.\n", job)
 	if err != nil {
 		t.Fatalf("Unable to delete loadbalancer: %v", err)
 	}

@@ -5,7 +5,7 @@ package elbaas
 import (
 	"testing"
 	"os"
-	"fmt"
+	//"fmt"
 
 	"github.com/gophercloud/gophercloud/acceptance/clients"
 	//networking "github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2"
@@ -68,7 +68,7 @@ func TestLoadbalancersCRUD(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unable to create listener: %v", err)
 	}
-	fmt.Printf("Listener created: %+v.\n", listener)
+	//fmt.Printf("Listener created: %+v.\n", listener)
 	defer DeleteListener(t, clientlb, listener.ID)
 
 	updateListenerOpts := listeners.UpdateOpts{
@@ -91,7 +91,7 @@ func TestLoadbalancersCRUD(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unable to create health: %v", err)
 	}
-	fmt.Printf("######   HEALTH before DeleteHealth !!!! lb=%v+ health=%v+ \n", lb, health)
+	//fmt.Printf("######   HEALTH before DeleteHealth !!!! lb=%v+ health=%v+ \n", lb, health)
 	defer DeleteHealth(t, clientlb, lb.ID, health.ID)
 
 	newInterval:= tools.RandomInt(1, 5)
@@ -114,7 +114,7 @@ func TestLoadbalancersCRUD(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unable to create backend: %v", err)
 	}
-	fmt.Printf("######   BackEnd before DeleteBackend !!!! lb=%v+ backend=%v+ \n", lb, backend)
-	defer RemoveBackend(t, clientlb, lb.ID, listener.ID)
+	//fmt.Printf("######   BackEnd before DeleteBackend !!!! lb=%v+ backend=%v+ \n", lb, backend)
+	defer RemoveBackend(t, clientlb, lb.ID, backend.ID)
 
 }

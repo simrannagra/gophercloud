@@ -34,13 +34,16 @@ func (opts AddOpts) ToBackendAddMap() (map[string]interface{}, error) {
 //
 // Users with an admin role can create Listeners on behalf of other tenants by
 // specifying a TenantID attribute different than their own.
-func Add(c *gophercloud.ServiceClient, listener_id string, opts AddOptsBuilder) (r CreateResult) {
+func Add(c *gophercloud.ServiceClient, listener_id string, opts AddOptsBuilder) (r AddResult) {
 	b, err := opts.ToBackendAddMap()
+	// API takes an array of these...
+	a := make([]map[string]interface{}, 1)
+	a[0] = b
 	if err != nil {
 		r.Err = err
 		return
 	}
-	_, r.Err = c.Post(addURL(c, listener_id), b, &r.Body, &gophercloud.RequestOpts{
+	_, r.Err = c.Post(addURL(c, listener_id), a, &r.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200},
 	})
 	return
@@ -67,7 +70,7 @@ func (opts RemoveOpts) ToBackendRemoveMap() (map[string]interface{}, error) {
 }
 
 // Remove will permanently remove a particular backend based on its unique ID.
-func Remove(c *gophercloud.ServiceClient, listener_id string, id string) (r DeleteResult) {
+func Remove(c *gophercloud.ServiceClient, listener_id string, id string) (r RemoveResult) {
 	removeOpts := RemoveOpts{
 		ID: id,
 	}
@@ -79,5 +82,11 @@ func Remove(c *gophercloud.ServiceClient, listener_id string, id string) (r Dele
 	_, r.Err = c.Post(removeURL(c, listener_id), b, &r.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200},
 	})
+	return
+}
+
+// Get retrieves a particular Health Monitor based on its unique ID.
+func Get(c *gophercloud.ServiceClient, listener_id, id string) (r GetResult) {
+	_, r.Err = c.Get(resourceURL(c, listener_id, id), &r.Body, nil)
 	return
 }
