@@ -60,7 +60,7 @@ func WaitForJobSuccess(client *ServiceClient, uri string, secs int) error {
 	})
 }
 
-func GetJobEntity(client *ServiceClient, uri string, label string) (map[string]interface{}, error) {
+func GetJobEntity(client *ServiceClient, uri string, label string) (interface{}, error) {
 	job := new(JobStatus)
 	_, err := client.Get(GetJobEndpoint(client.Endpoint) + uri, &job, nil)
 	if err != nil {
@@ -70,13 +70,11 @@ func GetJobEntity(client *ServiceClient, uri string, label string) (map[string]i
 
 	if job.Status == "SUCCESS" {
 		if e := job.Entities[label]; e != nil {
-			if m, ok := e.(map[string]interface{}); ok {
-				return m, nil
-			}
+			return e, nil
 		}
 	}
 
-	return nil, nil
+	return nil, fmt.Errorf("Unexpected conversion error in GetJobEntity.")
 }
 
 

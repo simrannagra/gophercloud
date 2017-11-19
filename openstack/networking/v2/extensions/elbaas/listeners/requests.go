@@ -105,7 +105,7 @@ type CreateOpts struct {
 	// The default value is insert. This parameter is invalid when protocol is set to TCP, SSL, or UDP,
 	// which means the parameter is empty.
 	// The ID of the default pool with which the Listener is associated.
-	StickySessionType string `json"sticky_session_type,omitempty"`
+	StickySessionType string `json:"sticky_session_type,omitempty"`
 	// Optional.  Specifies the cookie timeout period (minutes). This parameter is valid when protocol is set to HTTP,
 	// session_sticky to true, and sticky_session_type to insert. This parameter is invalid when protocol is set to
 	// TCP, UDP, or SSL. The value ranges from 1 to 1440.
@@ -148,7 +148,7 @@ type CreateOpts struct {
 	// The value of Strict is ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256.
 	// The default value is Default. The value can only be set to Extended if the value of ssl_protocols is set to
 	// TLSv1.2 TLSv1.1 TLSv1.
-	SSLCiphers string `json:"ssl_ciphers"`
+	SSLCiphers string `json:"ssl_ciphers,omitempty"`
 }
 
 // ToListenerCreateMap casts a CreateOpts struct to a map.
@@ -194,19 +194,19 @@ type UpdateOptsBuilder interface {
 type UpdateOpts struct {
 	// Required.  Specifies the load balancer name.
 	// The name is a string of 1 to 64 characters that consist of letters, digits, underscores (_), and hyphens (-).
-	Name string `json:"name", required:"true"`
+	Name string `json:"name,omitempty"`
 	// Optional. Provides supplementary information about the listener.
 	// The value is a string of 0 to 128 characters and cannot contain angle brackets (<>).
 	Description string `json:"description,omitempty"`
 	// Required.  Specifies the listening port.
 	// The value ranges from 1 to 65535.
-	ProtocolPort int `json:"port" required:"true"`
+	ProtocolPort int `json:"port,omitempty"`
 	// Required.  Specifies the backend port.
 	// The value ranges from 1 to 65535.
-	BackendProtocolPort int `json:"backend_port" required:"true"`
+	BackendProtocolPort int `json:"backend_port,omitempty"`
 	// Required.  Specifies the load balancing algorithm for the listener.
 	// The value can be roundrobin, leastconn, or source.
-	Algorithm string `json:"lb_algorithm" required:"true"`
+	Algorithm string `json:"lb_algorithm,omitempty"`
 	// Optional.  Specifies the TCP timeout period (minutes). This parameter is valid when protocol is set to TCP.
 	// The value ranges from 1 to 5.
 	TcpTimeout int `json:"tcp_timeout,omitempty"`
@@ -238,7 +238,7 @@ type UpdateOpts struct {
 	// The value of Strict is ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256.
 	// The default value is Default. The value can only be set to Extended if the value of ssl_protocols is set to
 	// TLSv1.2 TLSv1.1 TLSv1.
-	SSLCiphers string `json:"ssl_ciphers"`
+	SSLCiphers string `json:"ssl_ciphers,omitempty"`
 }
 
 // ToListenerUpdateMap casts a UpdateOpts struct to a map.

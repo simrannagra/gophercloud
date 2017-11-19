@@ -23,7 +23,7 @@ type Listener struct {
 	// Specifies the backend protocol.
 	BackendProtocol Protocol `json:"backend_protocol"`
 	// Specifies the cookie processing method. The value is insert.
-	StickySessionType string `json"sticky_session_type"`
+	StickySessionType string `json:"sticky_session_type"`
 	// Provides supplementary information about the listener.
 	Description string `json:"description"`
 	// Specifies the ID of the load balancer to which the listener belongs.

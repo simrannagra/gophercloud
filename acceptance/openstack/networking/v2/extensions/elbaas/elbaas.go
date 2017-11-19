@@ -12,6 +12,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/backendmember"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/healthcheck"
 	//"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/quota"
+	"fmt"
 )
 
 const loadbalancerActiveTimeoutSeconds = 300
@@ -78,25 +79,27 @@ func CreateLoadBalancer(t *testing.T, client *gophercloud.ServiceClient, subnetI
 		return nil, err
 	}
 
-	mlb, err := gophercloud.GetJobEntity(client, job.URI,"elb")
+	entity, err := gophercloud.GetJobEntity(client, job.URI,"elb")
 	//fmt.Printf("mlb=%+v.\n", mlb)
 	t.Logf("LoadBalancer %s is active", lbName)
 
-	if vid, ok := mlb["id"]; ok {
-		//fmt.Printf("vid=%s.\n", vid)
-		if id, ok := vid.(string); ok {
-			//fmt.Printf("id=%s.\n", id)
-			lb, err := loadbalancer_elbs.Get(client, id).Extract()
-			if err != nil {
-				//fmt.Printf("Error: %s.\n", err.Error())
-				return nil, err
+	if mlb, ok := entity.(map[string]interface{}); ok {
+		if vid, ok := mlb["id"]; ok {
+			//fmt.Printf("vid=%s.\n", vid)
+			if id, ok := vid.(string); ok {
+				//fmt.Printf("id=%s.\n", id)
+				lb, err := loadbalancer_elbs.Get(client, id).Extract()
+				if err != nil {
+					//fmt.Printf("Error: %s.\n", err.Error())
+					return nil, err
+				}
+				//fmt.Printf("lb=%+v.\n", lb)
+				return lb, err
 			}
-			//fmt.Printf("lb=%+v.\n", lb)
-			return lb, err
 		}
 	}
 
-	return nil, err
+	return nil, fmt.Errorf("Unexpected conversion error in CreateLoadBalancer.")
 }
 
 // CreateHealth will create a monitor with a random name for a specific pool.
@@ -131,7 +134,7 @@ func CreateHealth(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalan
 // CreateBackend will create a listener backend for a given load balancer on a random
 // port with a random name. An error will be returned if the listener could not
 // be created.
-func AddBackend(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalancer_elbs.LoadBalancer, listener *listeners.Listener, server_id string, address string) (*backendmember.Backend, error) {
+func AddBackend(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalancer_elbs.LoadBalancer, listener *listeners.Listener, server_id string, address string) (map[string]interface{}, error) {
 	addOpts := backendmember.AddOpts{
 		ServerId: server_id,
 		Address:   address,
@@ -150,7 +153,32 @@ func AddBackend(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalance
 		return nil, err
 	}
 
-	return nil, nil
+	entity, err := gophercloud.GetJobEntity(client, job.URI,"members")
+	//fmt.Printf("mlb=%+v.\n", mlb)
+	t.Logf("Backend for listener %s, lb %s is active", listener.ID, lb.ID)
+
+	if members, ok := entity.([]interface{}); ok {
+		if len(members) > 0 {
+			vmember := members[0]
+			if member, ok := vmember.(map[string]interface{}); ok {
+				return member, nil
+				/*if vid, ok := member["id"]; ok {
+					//fmt.Printf("vid=%s.\n", vid)
+					if id, ok := vid.(string); ok {
+						//fmt.Printf("id=%s.\n", id)
+						//backend, err := backendmember.Get(client, listener.ID, id).Extract()
+						if err != nil {
+							//fmt.Printf("Error: %s.\n", err.Error())
+							return nil, err
+						}
+						//fmt.Printf("lb=%+v.\n", lb)
+						return backend, err
+					}
+				} */
+			}
+		}
+	}
+	return nil, fmt.Errorf("Unexpected conversion error in AddBackend.")
 }
 
 // DeleteListener will delete a specified listener. A fatal error will occur if
