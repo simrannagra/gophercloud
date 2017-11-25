@@ -119,6 +119,6 @@ func TestLoadbalancersCRUD(t *testing.T) {
 	tools.PrintResource(t, backend)
 
 	//fmt.Printf("######   BackEnd before DeleteBackend !!!! lb=%v+ backend=%v+ \n", lb, backend)
-	RemoveBackend(t, clientlb, lb.ID, backend["id"].(string))
+	RemoveBackend(t, clientlb, lb.ID, backend.ID)
 
 }

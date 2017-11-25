@@ -134,7 +134,7 @@ func CreateHealth(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalan
 // CreateBackend will create a listener backend for a given load balancer on a random
 // port with a random name. An error will be returned if the listener could not
 // be created.
-func AddBackend(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalancer_elbs.LoadBalancer, listener *listeners.Listener, server_id string, address string) (map[string]interface{}, error) {
+func AddBackend(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalancer_elbs.LoadBalancer, listener *listeners.Listener, server_id string, address string) (*backendmember.Backend, error) {
 	addOpts := backendmember.AddOpts{
 		ServerId: server_id,
 		Address:   address,
@@ -161,12 +161,12 @@ func AddBackend(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalance
 		if len(members) > 0 {
 			vmember := members[0]
 			if member, ok := vmember.(map[string]interface{}); ok {
-				return member, nil
-				/*if vid, ok := member["id"]; ok {
+				//return member, nil
+				if vid, ok := member["id"]; ok {
 					//fmt.Printf("vid=%s.\n", vid)
 					if id, ok := vid.(string); ok {
 						//fmt.Printf("id=%s.\n", id)
-						//backend, err := backendmember.Get(client, listener.ID, id).Extract()
+						backend, err := backendmember.Get(client, listener.ID, id).Extract()
 						if err != nil {
 							//fmt.Printf("Error: %s.\n", err.Error())
 							return nil, err
@@ -174,7 +174,7 @@ func AddBackend(t *testing.T, client *gophercloud.ServiceClient, lb *loadbalance
 						//fmt.Printf("lb=%+v.\n", lb)
 						return backend, err
 					}
-				} */
+				}
 			}
 		}
 	}

@@ -171,7 +171,7 @@ type UpdateOpts struct {
 	// 0 or false: indicates that the load balancer is stopped. Only tenants are allowed to enter these two values.
 	// 1 or true: indicates that the load balancer is running properly.
 	// 2 or false: indicates that the load balancer is frozen. Only tenants are allowed to enter these two values.
-	AdminStateUp bool `json:"admin_state_up,omitempty"`
+	AdminStateUp *bool `json:"admin_state_up,omitempty"`
 }
 
 // ToLoadBalancerUpdateMap casts a UpdateOpts struct to a map.
