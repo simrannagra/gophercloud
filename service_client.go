@@ -110,6 +110,15 @@ func (client *ServiceClient) Delete(url string, opts *RequestOpts) (*http.Respon
 }
 
 // Delete calls `Request` with the "DELETE" HTTP verb.
+func (client *ServiceClient) Delete1(url string, opts *RequestOpts) (*http.Response, error) {
+	if opts == nil {
+		opts = new(RequestOpts)
+	}
+	client.initReqOpts(url, nil, nil, opts)
+	return client.Request("DELETE", url, opts)
+}
+
+// Delete calls `Request` with the "DELETE" HTTP verb.
 func (client *ServiceClient) Delete2(url string, JSONResponse interface{}, opts *RequestOpts) (*http.Response, error) {
 	if opts == nil {
 		opts = new(RequestOpts)

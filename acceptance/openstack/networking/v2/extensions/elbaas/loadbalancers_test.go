@@ -5,7 +5,7 @@ package elbaas
 import (
 	"testing"
 	"os"
-	"fmt"
+	//"fmt"
 
 	"github.com/gophercloud/gophercloud/acceptance/clients"
 	//networking "github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2"
@@ -14,6 +14,9 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs"
 	//"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/backendmember"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/healthcheck"
+	//"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	//compute "github.com/gophercloud/gophercloud/acceptance/openstack/compute/v2"
+	"fmt"
 )
 
 func TestLoadbalancersList(t *testing.T) {
@@ -66,7 +69,8 @@ func TestLoadbalancersCRUD(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unable to create listener: %v", err)
 	}
-	defer DeleteListener(t, clientlb, lb.ID, listener.ID)
+	//fmt.Printf("Listener created: %+v.\n", listener)
+	defer DeleteListener(t, clientlb, listener.ID)
 
 	updateListenerOpts := listeners.UpdateOpts{
 		Description: "Some listener description",
@@ -74,10 +78,6 @@ func TestLoadbalancersCRUD(t *testing.T) {
 	_, err = listeners.Update(clientlb, listener.ID, updateListenerOpts).Extract()
 	if err != nil {
 		t.Fatalf("Unable to update listener")
-	}
-
-	if err := WaitForLoadBalancerState(clientlb, lb.ID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
-		t.Fatalf("Timed out waiting for loadbalancer to become active")
 	}
 
 	newListener, err := listeners.Get(clientlb, listener.ID).Extract()
@@ -92,7 +92,7 @@ func TestLoadbalancersCRUD(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unable to create health: %v", err)
 	}
-	fmt.Printf("######   HEALTH before DeleteHealth !!!! lb=%v+ health=%v+ \n", lb, health)
+	//fmt.Printf("######   HEALTH before DeleteHealth !!!! lb=%v+ health=%v+ \n", lb, health)
 	defer DeleteHealth(t, clientlb, lb.ID, health.ID)
 
 	newInterval:= tools.RandomInt(1, 5)
@@ -104,10 +104,6 @@ func TestLoadbalancersCRUD(t *testing.T) {
 		t.Fatalf("Unable to update health")
 	}
 
-	if err := WaitForLoadBalancerState(clientlb, lb.ID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
-		t.Fatalf("Timed out waiting for loadbalancer to become active")
-	}
-
 	newHealth, err := healthcheck.Get(clientlb, health.ID).Extract()
 	if err != nil {
 		t.Fatalf("Unable to get health")
@@ -115,23 +111,14 @@ func TestLoadbalancersCRUD(t *testing.T) {
 
 	tools.PrintResource(t, newHealth)
 
-	// Backend Member
-	backend, err, bId:= CreateBackend(t, clientlb, lb, listener)
+	backend, err := AddBackend(t, clientlb, lb, listener, os.Getenv("OS_SERVER_ID"), os.Getenv("OS_SERVER_ADDRESS"))
 	if err != nil {
 		t.Fatalf("Unable to create backend: %v", err)
 	}
-	fmt.Printf("######   BackEnd before DeleteBackend !!!! lb=%v+ backend=%v+ \n", lb, backend)
-	defer DeleteBackend(t, clientlb, lb.ID, listener.ID, bId)
+	fmt.Printf("backend: %+v.\n", backend)
+	tools.PrintResource(t, backend)
 
-
-	if err := WaitForLoadBalancerState(clientlb, lb.ID, 1, loadbalancerActiveTimeoutSeconds); err != nil {
-		t.Fatalf("Timed out waiting for loadbalancer to become active")
-	}
-	newHealth, err = healthcheck.Get(clientlb, health.ID).Extract()
-	if err != nil {
-		t.Fatalf("Unable to get health")
-	}
-
-	tools.PrintResource(t, newHealth)
+	//fmt.Printf("######   BackEnd before DeleteBackend !!!! lb=%v+ backend=%v+ \n", lb, backend)
+	RemoveBackend(t, clientlb, lb.ID, backend.ID)
 
 }
