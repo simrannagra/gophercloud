@@ -1,7 +1,7 @@
 package fwaas_v2
 
 import (
-	"fmt"
+	//"fmt"
 	"strconv"
 	"testing"
 	//"time"
@@ -33,7 +33,7 @@ func CreateFirewallGroup(t *testing.T, client *gophercloud.ServiceClient, policy
 	if err != nil {
 		return firewall_group, err
 	}
-	fmt.Printf("Created firewall_group=%+v.\n", firewall_group)
+	//fmt.Printf("Created firewall_group=%+v.\n", firewall_group)
 
 	// NOT ACTIVE if not connected to subnet, so don't wait?
 	t.Logf("Waiting for firewall group to become active.")
@@ -69,7 +69,7 @@ func CreateFirewallGroupOnPort(t *testing.T, client *gophercloud.ServiceClient, 
 	if err != nil {
 		return firewall_group, err
 	}
-	fmt.Printf("Created firewall_group=%+v.\n", firewall_group)
+	//fmt.Printf("Created firewall_group=%+v.\n", firewall_group)
 
 	t.Logf("Waiting for firewall group to become active.")
 	if err := WaitForFirewallGroupState(client, firewall_group.ID, "ACTIVE", 300); err != nil {
@@ -189,7 +189,7 @@ func DeleteRule(t *testing.T, client *gophercloud.ServiceClient, ruleID string) 
 func WaitForFirewallGroupState(client *gophercloud.ServiceClient, firewallID, status string, secs int) error {
 	return gophercloud.WaitFor(secs, func() (bool, error) {
 		current, err := firewall_groups.Get(client, firewallID).Extract()
-		fmt.Printf("WaitForFirewallGroupState got fg=%+v\n.", current)
+		//fmt.Printf("WaitForFirewallGroupState got fg=%+v\n.", current)
 		//time.Sleep(5000)
 		if err != nil {
 			if httpStatus, ok := err.(gophercloud.ErrDefault404); ok {

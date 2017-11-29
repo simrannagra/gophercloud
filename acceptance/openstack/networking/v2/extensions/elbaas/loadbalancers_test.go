@@ -5,7 +5,6 @@ package elbaas
 import (
 	"testing"
 	"os"
-	//"fmt"
 
 	"github.com/gophercloud/gophercloud/acceptance/clients"
 	//networking "github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2"
@@ -16,7 +15,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/healthcheck"
 	//"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	//compute "github.com/gophercloud/gophercloud/acceptance/openstack/compute/v2"
-	"fmt"
 )
 
 func TestLoadbalancersList(t *testing.T) {
@@ -115,7 +113,7 @@ func TestLoadbalancersCRUD(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unable to create backend: %v", err)
 	}
-	fmt.Printf("backend: %+v.\n", backend)
+	//fmt.Printf("backend: %+v.\n", backend)
 	tools.PrintResource(t, backend)
 
 	//fmt.Printf("######   BackEnd before DeleteBackend !!!! lb=%v+ backend=%v+ \n", lb, backend)

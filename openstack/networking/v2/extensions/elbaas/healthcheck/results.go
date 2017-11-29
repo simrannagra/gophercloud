@@ -3,7 +3,7 @@ package healthcheck
 import (
 	"github.com/gophercloud/gophercloud"
 	//"github.com/gophercloud/gophercloud/pagination"
-    "fmt"
+    //"fmt"
 )
 
 // Health represents a load balancer health check. A health monitor is used
@@ -54,14 +54,14 @@ type commonResult struct {
 
 // Extract is a function that accepts a result and extracts a monitor.
 func (r commonResult) Extract() (*Health, error) {
-	fmt.Printf("Extracting Health...\n")
+	//fmt.Printf("Extracting Health...\n")
 	l := new(Health)
 	err := r.ExtractInto(l)
 	if err != nil {
-		fmt.Printf("Error: %s.\n", err.Error())
+		//fmt.Printf("Error: %s.\n", err.Error())
 		return nil, err
 	} else {
-		fmt.Printf("Returning extract: %+v.\n", l)
+		//fmt.Printf("Returning extract: %+v.\n", l)
 		return l, nil
 	}
 }

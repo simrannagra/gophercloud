@@ -4,7 +4,7 @@ package v2
 
 import (
 	"testing"
-	"fmt"
+	//"fmt"
 
 	"github.com/gophercloud/gophercloud/acceptance/clients"
 	extensions "github.com/gophercloud/gophercloud/acceptance/openstack/networking/v2/extensions"
@@ -53,7 +53,7 @@ func TestPortsDeleteAll(t *testing.T) {
 	for _, port := range allPorts {
 		tools.PrintResource(t, port)
 		if port.DeviceID != "" && port.DeviceOwner == "network:router_interface_distributed" {
-			fmt.Printf("DeleteRouterInterface...\n")
+			//fmt.Printf("DeleteRouterInterface...\n")
 			layer3.DeleteRouterInterface(t, client, port.ID, port.DeviceID)
 			//fmt.Printf("DeletePort...\n")
 			//DeletePort(t, client, port.ID)

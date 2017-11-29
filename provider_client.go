@@ -3,15 +3,12 @@ package gophercloud
 import (
 	"bytes"
 	"encoding/json"
-	//"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
-	//"reflect"
 	//"fmt"
 	//"reflect"
-	"fmt"
 )
 
 // DefaultUserAgent is the default User-Agent string set in the request header.

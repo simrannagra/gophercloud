@@ -3,7 +3,7 @@ package loadbalancer_elbs
 import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/pagination"
-	"fmt"
+	//"fmt"
 )
 
 // ListOptsBuilder allows extensions to add additional parameters to the
@@ -52,7 +52,7 @@ func (opts ListOpts) ToLoadBalancerListQuery() (string, error) {
 // tenant who submits the request, unless an admin user submits the request.
 func List(c *gophercloud.ServiceClient, opts ListOptsBuilder) pagination.Pager {
 	url := rootURL(c)
-	fmt.Printf("url=%s.\n", url)
+	//fmt.Printf("url=%s.\n", url)
 	if opts != nil {
 		query, err := opts.ToLoadBalancerListQuery()
 		if err != nil {
@@ -132,7 +132,7 @@ func Create(c *gophercloud.ServiceClient, opts CreateOptsBuilder) (r CreateResul
 		r.Err = err
 		return
 	}
-	fmt.Printf("Create (%+v): rootURL: %s, b=%+v.\n", c, rootURL(c), b)
+	//fmt.Printf("Create (%+v): rootURL: %s, b=%+v.\n", c, rootURL(c), b)
 	_, r.Err = c.Post(rootURL(c), b, &r.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200},
 	})

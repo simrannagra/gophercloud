@@ -5,7 +5,7 @@ package v2
 import (
 	"crypto/rand"
 	"crypto/rsa"
-	"fmt"
+	//"fmt"
 	"testing"
 
 	"github.com/gophercloud/gophercloud"
@@ -687,7 +687,7 @@ func GetNetworkIDFromTenantNetworks(t *testing.T, client *gophercloud.ServiceCli
 	}
 
 	for _, network := range allNetworks {
-		fmt.Printf("network=%+v", network)
+		//fmt.Printf("network=%+v", network)
 		if network.Name == networkName {
 			return network.ID, nil
 		}

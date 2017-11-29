@@ -4,7 +4,7 @@ import (
 	"github.com/gophercloud/gophercloud"
 	// "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/listeners"
 	"github.com/gophercloud/gophercloud/pagination"
-	"fmt"
+	//"fmt"
 )
 
 // LoadBalancer is the primary load balancing configuration object that specifies
@@ -82,14 +82,14 @@ type commonResult struct {
 
 // Extract is a function that accepts a result and extracts a loadbalancer.
 func (r commonResult) Extract() (*LoadBalancer, error) {
-	fmt.Printf("Extracting...\n")
+	//fmt.Printf("Extracting...\n")
 	lb := new(LoadBalancer)
 	err := r.ExtractInto(lb)
 	if err != nil {
-		fmt.Printf("Error: %s.\n", err.Error())
+		//fmt.Printf("Error: %s.\n", err.Error())
 		return nil, err
 	} else {
-		fmt.Printf("Returning extract: %+v.\n", lb)
+		//fmt.Printf("Returning extract: %+v.\n", lb)
 		return lb, nil
 	}
 }
