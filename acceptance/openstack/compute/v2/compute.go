@@ -24,10 +24,27 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/servergroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tags"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 
 	"golang.org/x/crypto/ssh"
+	"fmt"
 )
+
+func CreateServerTags(t *testing.T, client *gophercloud.ServiceClient, server_id string, taglist []string) (*tags.Tags, error) {
+	createOpts := tags.CreateOpts{
+		Tags: taglist,
+	}
+	return tags.Create(client, server_id, createOpts).Extract()
+}
+
+func DeleteServerTags(t *testing.T, client *gophercloud.ServiceClient, server_id string) error {
+	return tags.Delete(client, server_id).ExtractErr()
+}
+
+func GetServerTags(t *testing.T, client *gophercloud.ServiceClient, server_id string) (*tags.Tags, error) {
+	return tags.Get(client, server_id).Extract()
+}
 
 // AssociateFloatingIP will associate a floating IP with an instance. An error
 // will be returned if the floating IP was unable to be associated.
