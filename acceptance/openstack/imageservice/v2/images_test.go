@@ -37,6 +37,33 @@ func TestImagesListEachPage(t *testing.T) {
 	})
 }
 
+func TestImagesListTest(t *testing.T) {
+	client, err := clients.NewImageServiceV2Client()
+	if err != nil {
+		t.Fatalf("Unable to create an image service client: %v", err)
+	}
+
+	listOpts := images.ListOpts{
+		Name: "test-image",
+		Limit: 1,
+	}
+
+	pager := images.List(client, listOpts)
+	err = pager.EachPage(func(page pagination.Page) (bool, error) {
+		images, err := images.ExtractImages(page)
+		if err != nil {
+			t.Fatalf("Unable to extract images: %v", err)
+		}
+
+		for _, image := range images {
+			tools.PrintResource(t, image)
+			tools.PrintResource(t, image.Properties)
+		}
+
+		return true, nil
+	})
+}
+
 func TestImagesListAllPages(t *testing.T) {
 	client, err := clients.NewImageServiceV2Client()
 	if err != nil {

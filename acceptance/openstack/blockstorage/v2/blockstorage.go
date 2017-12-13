@@ -11,6 +11,7 @@ import (
 	"github.com/gophercloud/gophercloud/acceptance/tools"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/snapshots"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/tags"
 )
 
 // CreateVolume will create a volume with a random name and size of 1GB. An
@@ -40,6 +41,23 @@ func CreateVolume(t *testing.T, client *gophercloud.ServiceClient) (*volumes.Vol
 
 	return volume, nil
 }
+
+func CreateVolumeTags(t *testing.T, client *gophercloud.ServiceClient, resource_type, resource_id string, tagmap map[string]string) (*tags.Tags, error) {
+	createOpts := tags.CreateOpts{
+		Tags: tagmap,
+	}
+	return tags.Create(client, resource_type, resource_id, createOpts).Extract()
+}
+
+func DeleteVolumeTags(t *testing.T, client *gophercloud.ServiceClient, resource_type, resource_id string) error {
+	return tags.Delete(client, resource_type, resource_id).ExtractErr()
+}
+
+func GetVolumeTags(t *testing.T, client *gophercloud.ServiceClient, resource_type, resource_id string) (*tags.Tags, error) {
+	return tags.Get(client, resource_type, resource_id).Extract()
+}
+
+
 
 // CreateVolumeFromImage will create a volume from with a random name and size of
 // 1GB. An error will be returned if the volume was unable to be created.

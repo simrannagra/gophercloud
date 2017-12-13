@@ -14,13 +14,13 @@ type CreateOptsBuilder interface {
 // CreateOpts implements CreateOptsBuilder
 type CreateOpts struct {
 	// Tags is a set of tags.
-	Tags map[string]string `json:"tags,omitempty"`
+	Tags map[string]string `json:"tags" required:"true"`
 }
 
 // ToImageCreateMap assembles a request body based on the contents of
 // a CreateOpts.
 func (opts CreateOpts) ToTagsCreateMap() (map[string]interface{}, error) {
-	b, err := gophercloud.BuildRequestBody(opts, "tags")
+	b, err := gophercloud.BuildRequestBody(opts, "")
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func Create(client *gophercloud.ServiceClient, resource_type, resource_id string
 		r.Err = err
 		return r
 	}
-	_, r.Err = client.Post(createURL(client, resource_type, resource_id), b, &r.Body, &gophercloud.RequestOpts{OkCodes: []int{201}})
+	_, r.Err = client.Put(createURL(client, resource_type, resource_id), b, &r.Body, &gophercloud.RequestOpts{OkCodes: []int{200}})
 	return
 }
 
@@ -46,9 +46,12 @@ func Get(client *gophercloud.ServiceClient, resource_type, resource_id string) (
 }
 
 
-// Delete implements image delete request
+// Delete implements image delete request by creating empty tag map
 func Delete(client *gophercloud.ServiceClient, resource_type, resource_id string) (r DeleteResult) {
-	_, r.Err = client.Delete(deleteURL(client, resource_type, resource_id), nil)
+	createOpts := CreateOpts{
+		Tags: map[string]string{},
+	}
+	_, r.Err = Create(client, resource_type, resource_id, createOpts).Extract()
 	return
 }
 
