@@ -292,6 +292,23 @@ func initClientOpts(client *gophercloud.ProviderClient, eo gophercloud.EndpointO
 	return sc, nil
 }
 
+func initClientOpts1(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts, clientType string) (*gophercloud.ServiceClient1, error) {
+	pid, e := GetProjectId(client)
+	if e != nil {
+		return nil, e
+	}
+
+	c, e := initClientOpts(client, eo, clientType)
+	if e != nil {
+		return nil, e
+	}
+
+	sc := new(gophercloud.ServiceClient1)
+	sc.ServiceClient = c
+	sc.ProjectID = pid
+	return sc, nil
+}
+
 // NewObjectStorageV1 creates a ServiceClient that may be used with the v1 object storage package.
 func NewObjectStorageV1(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
 	return initClientOpts(client, eo, "object-store")
@@ -362,5 +379,14 @@ func NewDNSV2(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (
 func NewImageServiceV2(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "image")
 	sc.ResourceBase = sc.Endpoint + "v2/"
+	return sc, err
+}
+
+func NewCESClient(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient1, error) {
+	sc, err := initClientOpts1(client, eo, "ces")
+	if err != nil {
+		return nil, err
+	}
+	sc.ResourceBase = sc.Endpoint
 	return sc, err
 }
