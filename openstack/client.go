@@ -326,6 +326,18 @@ func NewNetworkV2(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpt
 	return sc, err
 }
 
+// NewVpcV1 creates a ServiceClient that may be used with the v1 VPC for OTC.
+func NewVpcV1(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
+	pid, e := GetProjectId(client)
+	if e != nil {
+		return nil, e
+	}
+
+	sc, err := initClientOpts(client, eo, "network")
+	sc.ResourceBase = sc.Endpoint + "v1/" + pid + "/"
+	return sc, err
+}
+
 // NewOtcV1 creates a ServiceClient that may be used with the v1 network package.
 func NewOtcV1(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts, otctype string) (*gophercloud.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "compute")
