@@ -19,7 +19,7 @@ import (
 )
 
 // CreateRdsinstance creates a basic Rds instance with a randomly generated name.
-func CreateRdsInstance(t *testing.T, client *gophercloud.ServiceClient1,
+func CreateRdsInstance(t *testing.T, client *gophercloud.ServiceClient,
     routerId string, networkId string, securityGroupId string) (*instances.Instance, error) {
 	if testing.Short() {
 		t.Skip("Skipping test that requires Rds instance creation in short mode.")
@@ -81,7 +81,7 @@ func CreateRdsInstance(t *testing.T, client *gophercloud.ServiceClient1,
 
 // WaitForInstanceStatus will poll an rds instance's status until it either matches
 // the specified status or the status becomes ERROR.
-func WaitForInstanceStatus(t *testing.T, client *gophercloud.ServiceClient1, id string, status string) error {
+func WaitForInstanceStatus(t *testing.T, client *gophercloud.ServiceClient, id string, status string) error {
     return WaitStatusFor(func() (bool, error) {
         latest, err := instances.Get(client, id).Extract()
         if err != nil {
@@ -105,7 +105,7 @@ func WaitForInstanceStatus(t *testing.T, client *gophercloud.ServiceClient1, id 
 }
 
 
-func WaitForInstanceVolumeSize(t *testing.T, client *gophercloud.ServiceClient1, id string, volumeSize int) error {
+func WaitForInstanceVolumeSize(t *testing.T, client *gophercloud.ServiceClient, id string, volumeSize int) error {
     return WaitStatusFor(func() (bool, error) {
         latest, err := instances.Get(client, id).Extract()
         if err != nil {
@@ -140,7 +140,7 @@ func WaitStatusFor(predicate func() (bool, error)) error {
 }
 
 
-func UpdateRdsInstance(t *testing.T, client *gophercloud.ServiceClient1, id string,
+func UpdateRdsInstance(t *testing.T, client *gophercloud.ServiceClient, id string,
     volumeSize int) (*instances.Instance, error) {
     if testing.Short() {
         t.Skip("Skipping test that requires Rds instance creation in short mode.")
@@ -169,7 +169,7 @@ func UpdateRdsInstance(t *testing.T, client *gophercloud.ServiceClient1, id stri
 
 
 // DeleteRdsInstance deletes an instance via its UUID.
-func DeleteRdsInstance(t *testing.T, client *gophercloud.ServiceClient1, instance *instances.Instance) {
+func DeleteRdsInstance(t *testing.T, client *gophercloud.ServiceClient, instance *instances.Instance) {
     result := instances.Delete(client, instance.ID)
     if result.Err != nil {
         t.Fatalf("Unable to delete Rds instance %s: %s", instance.ID, result.Err)
