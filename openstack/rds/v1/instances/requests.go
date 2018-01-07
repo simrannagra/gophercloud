@@ -18,8 +18,25 @@ type UpdateOpsBuilder interface {
 	ToInstanceUpdateMap() (map[string]interface{}, error)
 }
 
+type UpdatePolicyOpsBuilder interface {
+    ToInstanceUpdatePolicyMap() (map[string]interface{}, error)
+}
+
+type UpdateFlavorOpsBuilder interface {
+    ToInstanceFlavorUpdateMap() (map[string]interface{}, error)
+}
+
 type UpdateOps struct {
 	Volume map[string]interface{} `json:"volume"`
+}
+
+type UpdatePolicyOps struct {
+    StartTime string `json:"starttime"`
+    KeepDays  int    `json:"keepday"`
+}
+
+type UpdateFlavorOps struct {
+	FlavorRef string `json:"flavorRef"`
 }
 
 //CreateOps is a struct that contains all the parameters.
@@ -91,8 +108,16 @@ func (ops UpdateOps) ToInstanceUpdateMap() (map[string]interface{}, error) {
 	return gophercloud.BuildRequestBody(ops, "resize")
 }
 
+func (ops UpdatePolicyOps) ToInstanceUpdatePolicyMap() (map[string]interface{}, error) {
+    return gophercloud.BuildRequestBody(ops, "policy")
+}
+
+func (ops UpdateFlavorOps) ToInstanceFlavorUpdateMap() (map[string]interface{}, error) {
+    return gophercloud.BuildRequestBody(ops, "resize")
+}
+
 //Create a instance with given parameters.
-func Create(client *gophercloud.ServiceClient1, ops CreateOpsBuilder) (r CreateResult) {
+func Create(client *gophercloud.ServiceClient, ops CreateOpsBuilder) (r CreateResult) {
 	b, err := ops.ToInstanceCreateMap()
 	if err != nil {
 		r.Err = err
@@ -107,7 +132,7 @@ func Create(client *gophercloud.ServiceClient1, ops CreateOpsBuilder) (r CreateR
 	return
 }
 
-func UpdateVolumeSize(client *gophercloud.ServiceClient1, ops UpdateOpsBuilder, id string) (r UpdateResult) {
+func UpdateVolumeSize(client *gophercloud.ServiceClient, ops UpdateOpsBuilder, id string) (r UpdateResult) {
 	b, err := ops.ToInstanceUpdateMap()
 	if err != nil {
 		r.Err = err
@@ -121,8 +146,37 @@ func UpdateVolumeSize(client *gophercloud.ServiceClient1, ops UpdateOpsBuilder, 
 	return
 }
 
+func UpdatePolicy(client *gophercloud.ServiceClient, ops UpdatePolicyOpsBuilder, id string) (r UpdateResult) {
+    b, err := ops.ToInstanceUpdatePolicyMap()
+    if err != nil {
+        r.Err = err
+        return
+    }
+
+    _, r.Err = client.Put(updatePolicyURL(client, id), b, &r.Body, &gophercloud.RequestOpts{
+        OkCodes:     []int{200},
+        MoreHeaders: RequestOpts.MoreHeaders, JSONBody: nil,
+    })
+    return
+}
+
+
+func UpdateFlavorRef(client *gophercloud.ServiceClient, ops UpdateFlavorOpsBuilder, id string) (r UpdateResult) {
+	b, err := ops.ToInstanceFlavorUpdateMap()
+	if err != nil {
+		r.Err = err
+		return
+	}
+
+	_, r.Err = client.Post(updateURL(client, id), b, &r.Body, &gophercloud.RequestOpts{
+		OkCodes:     []int{202},
+		MoreHeaders: RequestOpts.MoreHeaders, JSONBody: nil,
+	})
+	return
+}
+
 //delete a instance via id
-func Delete(client *gophercloud.ServiceClient1, id string) (r DeleteResult) {
+func Delete(client *gophercloud.ServiceClient, id string) (r DeleteResult) {
 	RequestOpts.OkCodes = []int{202}
 	RequestOpts.JSONBody = nil
 	_, r.Err = client.Delete(deleteURL(client, id), &gophercloud.RequestOpts{
@@ -133,7 +187,7 @@ func Delete(client *gophercloud.ServiceClient1, id string) (r DeleteResult) {
 }
 
 //get a instance with detailed information by id
-func Get(client *gophercloud.ServiceClient1, id string) (r GetResult) {
+func Get(client *gophercloud.ServiceClient, id string) (r GetResult) {
 
 	_, r.Err = client.Get(getURL(client, id), &r.Body, &gophercloud.RequestOpts{
 		OkCodes:     []int{200},
@@ -143,7 +197,7 @@ func Get(client *gophercloud.ServiceClient1, id string) (r GetResult) {
 }
 
 //list all the instances
-func List(client *gophercloud.ServiceClient1) (r ListResult) {
+func List(client *gophercloud.ServiceClient) (r ListResult) {
 
 	_, r.Err = client.Get(listURL(client), &r.Body, &gophercloud.RequestOpts{
 		OkCodes:     []int{200},

@@ -9,7 +9,7 @@ var RequestOpts gophercloud.RequestOpts = gophercloud.RequestOpts{
 }
 
 //list the version informations about a specified type of database
-func List(client *gophercloud.ServiceClient1, dataStoreName string) (r ListResult) {
+func List(client *gophercloud.ServiceClient, dataStoreName string) (r ListResult) {
 
 	_, r.Err = client.Get(listURL(client, dataStoreName), &r.Body, &gophercloud.RequestOpts{
 		OkCodes:     []int{200},

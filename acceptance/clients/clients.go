@@ -326,7 +326,7 @@ func NewNetworkV2Client() (*gophercloud.ServiceClient, error) {
 // NewRdsV1Client returns a *ServiceClient for making calls to the
 // OpenStack RDS v1 API. An error will be returned if authentication
 // or client creation was not possible.
-func NewRdsV1Client() (*gophercloud.ServiceClient1, error) {
+func NewRdsV1Client() (*gophercloud.ServiceClient, error) {
 	ao, err := openstack.AuthOptionsFromEnv()
 	if err != nil {
 		return nil, err
