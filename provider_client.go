@@ -54,7 +54,7 @@ type ProviderClient struct {
 
 	// TokenID is the ID of the most recently issued valid token.
 	TokenID string
-
+	ProjectID string
 	// EndpointLocator describes how this provider discovers the endpoints for
 	// its constituent services.
 	EndpointLocator EndpointLocator

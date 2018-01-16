@@ -342,6 +342,25 @@ func NewRdsV1Client() (*gophercloud.ServiceClient, error) {
 	})
 }
 
+// NewVpcV1Client returns a *ServiceClient for making calls to the
+// OTC Vpc v1 API. An error will be returned if authentication
+// or client creation was not possible.
+func NewVpcV1Client() (*gophercloud.ServiceClient, error) {
+	ao, err := openstack.AuthOptionsFromEnv()
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := openstack.AuthenticatedClient(ao)
+	if err != nil {
+		return nil, err
+	}
+
+	return openstack.NewVpcV1(client, gophercloud.EndpointOpts{
+		Region: os.Getenv("OS_REGION_NAME"),
+	})
+}
+
 // NewNetworkV2Client returns a *ServiceClient for making calls to the
 // OpenStack Networking v2 API. An error will be returned if authentication
 // or client creation was not possible.
