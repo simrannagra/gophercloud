@@ -104,7 +104,7 @@ func FilterEIPs(eips []Eip, opts ListOpts) ([]Eip, error) {
 	if opts.BandwidthId != "" {
 		m["BandwidthId"] = opts.BandwidthId
 	}
-	if opts.TenantID != "" {
+	if opts.BandwidthSize != 0 {
 		m["BandwidthSize"] = opts.BandwidthSize
 	}
 	if opts.BandwidthId != "" {
