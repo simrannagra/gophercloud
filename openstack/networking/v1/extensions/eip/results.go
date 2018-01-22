@@ -20,7 +20,6 @@ type Publicip struct {
 }
 
 
-// Eip represents a Neutron eip.
 type Eip struct {
 	// ID is the unique identifier for the eip.
 	ID string `json:"id"`
