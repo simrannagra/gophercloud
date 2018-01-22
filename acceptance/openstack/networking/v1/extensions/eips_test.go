@@ -40,7 +40,7 @@ func TestEipsCRUD(t *testing.T) {
 
 	tools.PrintResource(t, Eip)
 	updateOpts := eip.UpdateOpts{
-		PortId: "",
+		PortId: "3f2e210a-d2f0-4275-a0d5-79c69a571df8",
 	}
 
 	_, err = eip.Update(client, Eip.ID, updateOpts).Extract()
